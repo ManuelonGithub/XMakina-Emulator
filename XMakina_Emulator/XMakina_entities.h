@@ -17,6 +17,8 @@
 #define LAST_WORD (MEM_SIZE_WORDS - 1)
 #define LAST_BYTE (MEM_SIZE_BYTES - 1)
 
+#define MAX_PROG_NAME_SIZE 20
+
 #define XMAKINA_CPU_REG_COUNT 8
 
 union XMakina_memory {
