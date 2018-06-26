@@ -12,10 +12,13 @@
 #ifndef LOADER_H
 #define LOADER
 
-#define S_RECORD_MAX_SIZE 1000
-#define CHECKSUM_ERROR -1
+#define S_RECORD_MAX_SIZE 515
+#define HIGH_BYTE_SHIFT (1 << 8) 
 
-extern char memory[65536];
+enum RECORD_VALIDATION_CODES { VALID_RECORD = 1, CHECKSUM_ERROR = -1, S_RECORD_FILE_ERROR = -2};
+
+extern union XMakina_memory memory;
+extern char program_name[20];
 
 void loader(char * s_record_file_name);
 int s_record_decoder(char * s_record);
