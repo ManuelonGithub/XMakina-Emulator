@@ -1,17 +1,14 @@
 /*
-* X-Makina Emulator Project - Loader.cpp
-* Loader file contains all the functions that consist the loader program
-*
-* Programmer: Manuel Burnay
-*
-*
-* Date created: 26/06/2018
-*/
+ * X-Makina Emulator Project - Loader.cpp
+ * Loader file contains all the functions that consist the loader program
+ *
+ * Programmer: Manuel Burnay
+ *
+ *
+ * Date created: 26/06/2018
+ */
 
 #include "stdafx.h"
-#include <iostream>
-#include <fstream>
-#include <string>
 #include "Loader.h"
 #include "XMakina_entities.h"
 
@@ -76,6 +73,7 @@ int s_record_decoder(char * s_record)
 	loaded_address += data;						// Since loaded address is initialized to 0, This addition is equivalent to a bitwise OR.
 	validation_sum += data;
 
+	sscanf_s(&s_record[(DATA_POS + (hex_pair_count - 3) * 2)], "%2x", &checksum);	// Retrieves the checksum hex pair from record.
 
 	switch (s_record[1])
 	{
@@ -92,14 +90,26 @@ int s_record_decoder(char * s_record)
 		break;
 
 	case ('0'):
-		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {
+		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {	// This 
 			program_name[loaded_address++] = s_record[i];
 		}
-		break;
 
 	default:
+		checksum = ~validation_sum && 0xFF;
 		break;
 	}
 
-	return 0;
+	return checksum_validation(validation_sum, checksum);
+}
+
+int checksum_validation(unsigned int validation_sum, unsigned int checksum)
+{
+	validation_sum = ~validation_sum & 0xFF;
+
+	if (validation_sum != checksum) {
+		return CHECKSUM_ERROR;
+	}
+	else {
+		return VALID_RECORD;
+	}
 }

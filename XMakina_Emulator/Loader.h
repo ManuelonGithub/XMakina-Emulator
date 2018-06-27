@@ -22,6 +22,9 @@ extern union XMakina_memory memory;
 extern char program_name[20];
 
 void loader(char * s_record_file_name);
+
 int s_record_decoder(char * s_record);
+
+int checksum_validation(unsigned int validation_sum, unsigned int checksum);
 
 #endif LOADER_H
