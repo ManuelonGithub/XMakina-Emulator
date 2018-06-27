@@ -20,7 +20,7 @@
 void loader(char * s_record_file_name)
 {
 	FILE * s_record_file;
-	if (!fopen_s(&s_record_file, s_record_file_name, "r")) {
+	if (fopen_s(&s_record_file, s_record_file_name, "r") != 0) {
 		printf("Error opening S-Record file. \n");
 		return;
 	}
@@ -93,9 +93,11 @@ int s_record_decoder(char * s_record)
 		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {	// This 
 			program_name[loaded_address++] = s_record[i];
 		}
+		checksum = ~validation_sum & 0xFF;
+		break;
 
 	default:
-		checksum = ~validation_sum && 0xFF;
+		checksum = ~validation_sum & 0xFF;
 		break;
 	}
 
