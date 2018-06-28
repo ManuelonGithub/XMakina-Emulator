@@ -24,7 +24,10 @@
     <ClInclude Include="Loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XMakina_entities.h">
+    <ClInclude Include="XMakina_Emulator_entities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

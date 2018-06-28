@@ -10,7 +10,7 @@
 
 #pragma once
 #ifndef LOADER_H
-#define LOADER
+#define LOADER_H
 
 #define S_RECORD_MAX_SIZE 515
 #define HIGH_BYTE_SHIFT (1 << 8) 
@@ -27,4 +27,4 @@ int s_record_decoder(char * s_record);
 
 int checksum_validation(unsigned int validation_sum, unsigned int checksum);
 
-#endif LOADER_H
+#endif //!LOADER_H

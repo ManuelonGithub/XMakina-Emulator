@@ -10,7 +10,7 @@
 
 #include "stdafx.h"
 #include "Loader.h"
-#include "XMakina_entities.h"
+#include "XMakina_Emulator_entities.h"
 
 
 /* Loader Function: 
@@ -90,7 +90,7 @@ int s_record_decoder(char * s_record)
 		break;
 
 	case ('0'):
-		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {	// This 
+		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {	// This reads the characters pertaining to the program name
 			program_name[loaded_address++] = s_record[i];
 		}
 		checksum = ~validation_sum & 0xFF;
@@ -104,9 +104,13 @@ int s_record_decoder(char * s_record)
 	return checksum_validation(validation_sum, checksum);
 }
 
+
+/* checksum_validation Function:
+ * Performs the operation that checks if the data in the s-record is consistent with the checksum value 
+ */
 int checksum_validation(unsigned int validation_sum, unsigned int checksum)
 {
-	validation_sum = ~validation_sum & 0xFF;
+	validation_sum = ~validation_sum & 0xFF;	// Invert the bits of the validation sum and retrieve the lowest significant byte.
 
 	if (validation_sum != checksum) {
 		return CHECKSUM_ERROR;

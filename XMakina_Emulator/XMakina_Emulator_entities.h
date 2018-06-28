@@ -9,8 +9,8 @@
 */
 
 #pragma once
-#ifndef XMAKINA_ENTITIES_H
-#define XMAKINA_ENTITIES
+#ifndef XMAKINA_EMULATOR_ENTITIES_H
+#define XMAKINA_EMULATOR_ENTITIES_H
 
 #define MEM_SIZE_BYTES (1 << 16)
 #define MEM_SIZE_WORDS (1 << 15)
@@ -34,4 +34,4 @@ union XMakina_register_file {
 	struct XMakina_register_identifiers ID;
 	unsigned short int reg[XMAKINA_CPU_REG_COUNT];
 };
-#endif // !XMAKINA_ENTITIES_H
+#endif // !XMAKINA_EMULATOR_ENTITIES_H

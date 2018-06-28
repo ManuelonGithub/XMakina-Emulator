@@ -147,12 +147,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="debugger.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="XMakina_entities.h" />
+    <ClInclude Include="XMakina_Emulator_entities.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="debugger.cpp" />
     <ClCompile Include="Loader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
