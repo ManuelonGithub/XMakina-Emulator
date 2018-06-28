@@ -10,8 +10,6 @@
 
 #include "stdafx.h"
 #include "Loader.h"
-#include "XMakina_Emulator_entities.h"
-
 
 /* Loader Function: 
  * Checks if s-Record file can be open and opens it if able to. 
@@ -106,7 +104,7 @@ int s_record_decoder(char * s_record)
 
 
 /* checksum_validation Function:
- * Performs the operation that checks if the data in the s-record is consistent with the checksum value 
+ * Performs the operation that checks if the data in the s-record is consistent with the checksum value.
  */
 int checksum_validation(unsigned int validation_sum, unsigned int checksum)
 {

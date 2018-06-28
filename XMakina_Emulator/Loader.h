@@ -8,6 +8,8 @@
 * Date created: 26/06/2018
 */
 
+#include "XMakina_Emulator_entities.h"
+
 #pragma once
 #ifndef LOADER_H
 #define LOADER_H
@@ -19,7 +21,7 @@
 enum RECORD_VALIDATION_CODES { VALID_RECORD = 1, CHECKSUM_ERROR = -1, S_RECORD_FILE_ERROR = -2};
 
 extern union XMakina_memory memory;
-extern char program_name[20];
+extern char program_name[MAX_PROG_NAME_SIZE];
 
 void loader(char * s_record_file_name);
 
