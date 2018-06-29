@@ -15,10 +15,15 @@
  * Checks if s-Record file can be open and opens it if able to. 
  * Retrieves line from file to decode the contents of it and check if there is a checksum error has occured. 
  */
-void loader(char * s_record_file_name)
+void loader()
 {
+	char filename[100];
+
+	printf("file name: ");
+	scanf_s("%s", filename);
+
 	FILE * s_record_file;
-	if (fopen_s(&s_record_file, s_record_file_name, "r") != 0) {
+	if (fopen_s(&s_record_file, filename, "r") != 0) {
 		printf("Error opening S-Record file. \n");
 		return;
 	}

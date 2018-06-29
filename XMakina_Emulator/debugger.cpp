@@ -11,13 +11,16 @@ char debugger()
 	printf("=~=~=~=~=~Xmakina Debugger~=~=~=~=~=\n");
 
 	while (1) {
-		printf("Select an option:\n");
-		scanf_s("%c", menu_option);
+		printf("Input your option (Input H for menu options):\n");
+		scanf_s("%c", &menu_option);
+
+		menu_option = toupper(menu_option);
 
 		switch (menu_option)
 		{
-		case (BREAKPOINTS):
+		case (BREAKPOINT_MENU):
 			breakpoint_menu();
+			break;
 
 		case (RUN_PROGRAM):
 			return RUN_PROGRAM;
@@ -25,22 +28,33 @@ char debugger()
 		case (QUIT_PROGRAM):
 			return QUIT_PROGRAM;
 
-		case (VIEW_REG_FILE):
+		case (REG_FILE_MENU):
 			reg_file_menu();
 
-		case (VIEW_MEMORY):
+		case (MEMORY_MENU):
+			memory_menu();
+			break;
 
 		case (PROGRAM_STEP):
 			return PROGRAM_STEP;
 
-		case (SANITY_CHECK):
+		case (SANITY_CHECK_MENU):
+			sanity_check_menu();
+			break;
 
 		case (LOAD_PROGRAM):
+			loader();
+			break;
 
-		case (MENU_OPTIONS):
+		case (MENU_HELP):
+			printf("Debugger Menu options:\n");
+			printf("B = Breakpoint menu | R = Run program | Q = Quit program | F = Register File Menu\n");
+			printf("M = Memory Menu     | S = Sanity check menu              | L = Load program\n");
+			printf("Not inputting an option and pressing ENTER will step through the program.\n\n");
+			break;
 
 		default:
-			printf("Not a valid menu option.");
+			printf("Not a valid menu option.\n");
 			break;
 		}
 	}
@@ -55,3 +69,14 @@ void reg_file_menu()
 {
 
 }
+
+void memory_menu()
+{
+
+}
+
+void sanity_check_menu()
+{
+
+}
+

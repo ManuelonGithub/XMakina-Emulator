@@ -23,7 +23,7 @@ enum RECORD_VALIDATION_CODES { VALID_RECORD = 1, CHECKSUM_ERROR = -1, S_RECORD_F
 extern union XMakina_memory memory;
 extern char program_name[MAX_PROG_NAME_SIZE];
 
-void loader(char * s_record_file_name);
+void loader();
 
 int s_record_decoder(char * s_record);
 
