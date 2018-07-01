@@ -1,6 +1,6 @@
 /*
  * X-Makina Emulator Project - Loader.cpp
- * Loader file contains all the functions that consist the loader program
+ * Loader file contains all the functions that pertaining to the loader program
  *
  * Programmer: Manuel Burnay
  *
@@ -11,6 +11,7 @@
 #include "stdafx.h"
 #include "Loader.h"
 
+
 /* Loader Function: 
  * Checks if s-Record file can be open and opens it if able to. 
  * Retrieves line from file to decode the contents of it and check if there is a checksum error has occured. 
@@ -20,7 +21,7 @@ void loader()
 	char filename[100];
 
 	printf("file name: ");
-	scanf_s("%s", filename);
+	scanf_s("%s", &filename, 100);
 
 	FILE * s_record_file;
 	if (fopen_s(&s_record_file, filename, "r") != 0) {
@@ -29,6 +30,7 @@ void loader()
 	}
 
 	char s_record[S_RECORD_MAX_SIZE];
+
 	while (fgets(s_record, S_RECORD_MAX_SIZE, s_record_file)) {
 		if (s_record_decoder(s_record) == CHECKSUM_ERROR) {
 			printf("S-Record checksum error. \n");
@@ -58,9 +60,8 @@ int s_record_decoder(char * s_record)
 
 	// Simple check to avoid processing something that isn't an S-Record
 	if (s_record[0] != 'S') {
-		return S_RECORD_FILE_ERROR;
+		return S_RECORD_ERROR;
 	}
-
 
 	/* 
 	 * Initializing the address that the s-record is loading from.
@@ -69,7 +70,7 @@ int s_record_decoder(char * s_record)
 	 * The initialization is split in two parts so the data retrieved can be easily added to the validation sum.
 	 */
 	sscanf_s(&s_record[4], "%2x", &data);		// "Loading" the address high-byte
-	loaded_address = data * HIGH_BYTE_SHIFT;	// This multiplication is equivalent to a left byte shift.
+	loaded_address = HIGH_BYTE_SHIFT(data);	// This multiplication is equivalent to a left byte shift.
 	validation_sum += data;
 
 	sscanf_s(&s_record[6], "%2x", &data);		// "Loading" the address low-byte
@@ -82,6 +83,7 @@ int s_record_decoder(char * s_record)
 	{
 	case ('9'):
 		memory.word[LAST_WORD] = loaded_address;	// Program counter starting address is stored in PC word of Vector 15 (Reset Vector)
+		register_file.ID.PC = loaded_address;
 		break;
 
 	case ('1'):
@@ -100,7 +102,6 @@ int s_record_decoder(char * s_record)
 		break;
 
 	default:
-		checksum = ~validation_sum & 0xFF;
 		break;
 	}
 

@@ -30,6 +30,10 @@ struct XMakina_register_identifiers {
 	unsigned short int R0, R1, R2, R3, LR, SP, PSW, PC;
 };
 
+struct XMakina_system_registers {
+	unsigned short int MAR, MBR, IX;
+};
+
 union XMakina_register_file {
 	struct XMakina_register_identifiers ID;
 	unsigned short int reg[XMAKINA_CPU_REG_COUNT];

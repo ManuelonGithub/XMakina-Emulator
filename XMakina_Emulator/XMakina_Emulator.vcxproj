@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CPU_operations.h" />
     <ClInclude Include="debugger.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="stdafx.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="XMakina_Emulator_entities.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CPU_operations.cpp" />
     <ClCompile Include="debugger.cpp" />
     <ClCompile Include="Loader.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -30,6 +30,9 @@
     <ClInclude Include="debugger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CPU_operations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="debugger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CPU_operations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
