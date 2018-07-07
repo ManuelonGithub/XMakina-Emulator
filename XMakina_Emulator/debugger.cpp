@@ -35,11 +35,12 @@ char debugger_main_menu()
 		else {
 			printf("%s program has been loaded.\n\n", program_name);
 		}
+
+		menu_option = 0;
 		
 		printf("MAIN MENU: Input your option (Input H for menu options):\t");
-		scanf_s("%c", &menu_option, 1);
-		getchar();							// This extra "getchar()" will be seen whenever there's an "scanf" in the code. 
-											// This is because the system can register 2 enter key presses when the user inputs an option, which degrades the user interface experience.
+		scanf_s(" %c", &menu_option, 1);
+
 		menu_option = toupper(menu_option);
 
 		switch (menu_option)
@@ -100,7 +101,7 @@ void breakpoint_menu()
 	printf("\n=~=~=~=~=~ Xmakina Debugger: Breakpoint Menu ~=~=~=~=~=~=~=~\n");
 
 	printf("\nInput your option (Input H for menu options):\t");
-	scanf_s("%c", &menu_option, 1);
+	scanf_s(" %c", &menu_option, 1);
 	getchar();
 
 	menu_option = toupper(menu_option);
@@ -151,8 +152,7 @@ void reg_file_options()
 
 		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
 		printf("Input:\t");
-		scanf_s("%c", &option, 1);
-		getchar();
+		scanf_s(" %c", &option, 1);
 
 		option = toupper(option);
 
@@ -182,13 +182,11 @@ void change_reg_content()
 	unsigned int reg_num, new_reg_value;
 
 	printf("Input the register number you want to change:\tR");
-	scanf_s("%d", &reg_num);
-	getchar();
+	scanf_s(" %d", &reg_num);
 
 	if (reg_num >= 0 && reg_num < XMAKINA_CPU_REG_COUNT) {
 		printf("Input the new 16-bit hex value to be placed in R%d:\t0x", reg_num);
-		scanf_s("%x", &new_reg_value);
-		getchar();
+		scanf_s(" %x", &new_reg_value);
 
 		if (new_reg_value > MAX_16_BIT_VALUE) {
 			printf("Invalid register value.\n");
@@ -214,8 +212,7 @@ void memory_menu()
 		printf("\n=~=~=~=~=~ Xmakina Debugger: Memory Menu ~=~=~=~=~=~=~=~=~=~\n");
 
 		printf("\nMEMORY MENU: Input your option (Input H for menu options):\t");
-		scanf_s("%c", &menu_option, 1);
-		getchar();
+		scanf_s(" %c", &menu_option, 1);
 
 		menu_option = toupper(menu_option);
 
@@ -258,17 +255,14 @@ void memory_menu()
  */
 void top_bottom_memory_view()
 {
-	int i;
-	unsigned int bottom_lim, top_lim;
+	unsigned int i, bottom_lim, top_lim;
 
 	printf("\nInput the hex value of the lower bound address:\t0x");
-	scanf_s("%x", &bottom_lim);
-	getchar();
+	scanf_s(" %x", &bottom_lim);
 
 	if (bottom_lim < MEM_SIZE_BYTES) {
 		printf("Input the hex value of the upper bound address:\t0x");
-		scanf_s("%x", &top_lim);
-		getchar();
+		scanf_s(" %x", &top_lim);
 
 		if (top_lim > MEM_SIZE_BYTES || top_lim < bottom_lim) {
 			printf("Invalid upper limit.\n");
@@ -291,13 +285,11 @@ void change_mem_content()
 	unsigned int mem_loc, new_mem_value;
 
 	printf("Input the 16-bit memory location you want to change:\t0x");
-	scanf_s("%d", &mem_loc);
-	getchar();
+	scanf_s(" %d", &mem_loc);
 
 	if (mem_loc >= 0 && mem_loc < MEM_SIZE_BYTES) {
 		printf("Input the new 8-bit hex number to be placed in 0x%04X:\t0x", mem_loc);
-		scanf_s("%x", &new_mem_value);
-		getchar();
+		scanf_s(" %x", &new_mem_value);
 
 		if (new_mem_value > MAX_8_BIT_VALUE) {
 			printf("Invalid register value.\n");

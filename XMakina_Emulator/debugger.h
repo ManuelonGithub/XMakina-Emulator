@@ -42,4 +42,6 @@ void change_mem_content();
 
 void sanity_check_options();
 
+void close_program();
+
 #endif // !DEBUGGER_H

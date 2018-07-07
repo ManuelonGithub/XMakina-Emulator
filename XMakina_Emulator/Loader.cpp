@@ -53,10 +53,10 @@ int s_record_decoder(char * s_record)
 
 	// First get the number of amount of hex pairs in the record. 
 	// This is done in the beginning so we can initialize the validation sum with this value.
-	int hex_pair_count = 0;
+	int i = 0, hex_pair_count = 0;
 	sscanf_s(&s_record[2], "%2x", &hex_pair_count);
 
-	unsigned int loaded_address = 0, data, checksum, i = 0, validation_sum = hex_pair_count;
+	unsigned int loaded_address = 0, data, checksum, validation_sum = hex_pair_count;
 
 	// Simple check to avoid processing something that isn't an S-Record
 	if (s_record[0] != 'S') {

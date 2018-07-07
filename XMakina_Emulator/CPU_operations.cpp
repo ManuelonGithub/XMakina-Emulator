@@ -19,19 +19,38 @@ char fetch()
 			interrupt_return_management();
 		}
 		else {
-			printf("Invalid value inside of Program Counter. (PC = 0x%04X)\n", register_file.ID.PC);
-			return;
+			return PROCESS_FAILURE;
 		}
 	}
 	else {
 		system_registers.MAR = register_file.ID.PC;
-		bus(WORD, READ);
+		bus(system_registers.MAR, &system_registers.MBR, WORD, READ);
 		system_registers.IX = system_registers.MBR;
+		register_file.ID.PC += 2;
 	}
+
+	return PROCESS_SUCCESS;
 }
 
-void decode()
+char decode()
 {
+	char category = INST_CATEGORY(system_registers.IX);
+	// BRANCHING, ALU, MEM_ACCESS_REG_INIT, MEM_ACCESS_REL
+	switch (category)
+	{
+	case (BRANCHING):
+
+	case (ALU):
+
+	case (MEM_ACCESS_AND_REG_INIT):
+
+	case (MEM_ACCESS_REL):
+
+	default:
+		break;
+	}
+
+	return INVALID_INST;
 }
 
 void execute()
@@ -46,7 +65,27 @@ void debugger_tiggers()
 {
 }
 
-void bus(char byte_word_control, char read_write_control)
+void bus(unsigned short MAR, unsigned short * MBR, char byte_word_control, char read_write_control)
+{
+	if (system_registers.MAR < DEVICE_MEMORY_SPACE) {
+		device_memory_access(MAR, MBR, byte_word_control, read_write_control);
+	}
+	else {
+		if (read_write_control == READ) {
+			*MBR = (byte_word_control == WORD) ? memory.word[MAR >> 1] : memory.byte[MAR];
+		}
+		else {
+			if (byte_word_control == WORD) {
+				memory.word[MAR >> 1] = *MBR;
+			}
+			else {
+				memory.byte[MAR] = (unsigned char)* MBR;
+			}
+		}
+	}
+}
+
+void device_memory_access(unsigned short MAR, unsigned short * MBR, char byte_word_control, char read_write_control)
 {
 }
 
