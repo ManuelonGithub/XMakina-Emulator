@@ -83,7 +83,7 @@ int s_record_decoder(char * s_record)
 	{
 	case ('9'):
 		memory.word[LAST_WORD] = loaded_address;	// Program counter starting address is stored in PC word of Vector 15 (Reset Vector)
-		register_file.ID.PC = loaded_address;
+		PC = loaded_address;
 		break;
 
 	case ('1'):

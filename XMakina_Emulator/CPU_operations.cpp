@@ -14,8 +14,8 @@
 
 char fetch()
 {
-	if (register_file.ID.PC % 2 != 0) {
-		if (register_file.ID.PC == LAST_BYTE) {
+	if (PC % 2 != 0) {
+		if (PC == LAST_BYTE) {
 			interrupt_return_management();
 		}
 		else {
@@ -23,10 +23,10 @@ char fetch()
 		}
 	}
 	else {
-		system_registers.MAR = register_file.ID.PC;
+		system_registers.MAR = PC;
 		bus(system_registers.MAR, &system_registers.MBR, WORD, READ);
 		system_registers.IX = system_registers.MBR;
-		register_file.ID.PC += 2;
+		PC += 2;
 	}
 
 	return PROCESS_SUCCESS;
@@ -35,11 +35,11 @@ char fetch()
 char decode()
 {
 	char category = INST_CATEGORY(system_registers.IX);
-	// BRANCHING, ALU, MEM_ACCESS_REG_INIT, MEM_ACCESS_REL
+
 	switch (category)
 	{
 	case (BRANCHING):
-
+		
 	case (ALU):
 
 	case (MEM_ACCESS_AND_REG_INIT):

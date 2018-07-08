@@ -22,7 +22,7 @@ enum INST_CATEGORY {BRANCHING, ALU, MEM_ACCESS_AND_REG_INIT, MEM_ACCESS_REL};
 enum INST_TYPES { INVALID_INST = -1, SUBROUTINE_BRANCH, CONDITIONAL_BRANCH, TWO_OPERAND, SINGLE_REGISTER, DIRECT_MEMORY_ACCESS, REGISTER_INITIALIZATION, RELATIVE_MEMORY_ACCESS};
 
 extern union XMakina_memory memory;
-extern union XMakina_register_file register_file;
+extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
 extern struct XMakina_system_registers system_registers;
 
 struct branching_category {

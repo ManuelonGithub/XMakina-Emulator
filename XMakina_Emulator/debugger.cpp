@@ -147,7 +147,7 @@ void reg_file_options()
 		printf("\n=~=~=~=~=~ Xmakina Debugger: Register File ~=~=~=~=~=~=~=~=~\n\n");
 
 		for (i = 0; i < XMAKINA_CPU_REG_COUNT; i++) {
-			printf("R%d : 0x%04x\n", i, register_file.reg[i]);
+			printf("R%d : 0x%04x\n", i, REG_CON_table[REG][i]);
 		}
 
 		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
@@ -192,7 +192,7 @@ void change_reg_content()
 			printf("Invalid register value.\n");
 		}
 		else {
-			register_file.reg[reg_num] = new_reg_value;
+			REG_CON_table[REG][reg_num] = new_reg_value;
 		}
 	}
 	else {

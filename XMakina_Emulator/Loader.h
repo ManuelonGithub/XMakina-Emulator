@@ -21,7 +21,7 @@
 enum RECORD_VALIDATION_CODES { VALID_RECORD = 1, CHECKSUM_ERROR = -1, S_RECORD_ERROR = -2};
 
 extern union XMakina_memory memory;
-extern union XMakina_register_file register_file;
+extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
 extern char program_name[MAX_PROG_NAME_SIZE];
 
 void loader();

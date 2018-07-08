@@ -20,21 +20,31 @@
 #define XMAKINA_CPU_REG_COUNT 8
 #define DEVICE_MEMORY_SPACE 16
 
+#define REG_OR_CON 2
+#define REG 0
+#define CON 1
+#define LR (REG_CON_table[REG][4])
+#define SP (REG_CON_table[REG][5])
+#define PSW (REG_CON_table[REG][6])
+#define PC (REG_CON_table[REG][7])
+
+
+
 union XMakina_memory {
 	unsigned char byte[MEM_SIZE_BYTES];
 	unsigned short word[MEM_SIZE_WORDS];
 };
 
-struct XMakina_register_identifiers {
-	unsigned short R0, R1, R2, R3, LR, SP, PSW, PC;
-};
-
+//struct XMakina_register_identifiers {
+//	unsigned short R0, R1, R2, R3, LR, SP, PSW, PC;
+//};
+//
 struct XMakina_system_registers {
 	unsigned short MAR, MBR, IX;
 };
-
-union XMakina_register_file {
-	struct XMakina_register_identifiers ID;
-	unsigned short reg[XMAKINA_CPU_REG_COUNT];
-};
+//
+//union XMakina_register_file {
+//	struct XMakina_register_identifiers ID;
+//	unsigned short reg[XMAKINA_CPU_REG_COUNT];
+//};
 #endif // !XMAKINA_EMULATOR_ENTITIES_H
