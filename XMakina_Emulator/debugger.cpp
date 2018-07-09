@@ -40,8 +40,9 @@ char debugger_main_menu()
 		
 		printf("MAIN MENU: Input your option (Input H for menu options):\t");
 		scanf_s(" %c", &menu_option, 1);
-
 		menu_option = toupper(menu_option);
+
+		printf("\n\n");
 
 		switch (menu_option)
 		{
@@ -58,8 +59,12 @@ char debugger_main_menu()
 			}
 			break;
 
-		case (QUIT_PROGRAM):
-			return QUIT_PROGRAM;
+		case (CLOSE_PROGRAM):
+			close_program();
+			break;
+
+		case (QUIT_EMULATOR):
+			return QUIT_EMULATOR;
 			break;
 
 		case (REG_FILE_OPTIONS):
@@ -81,7 +86,7 @@ char debugger_main_menu()
 		case (MENU_HELP):
 			printf("\nMain Menu options:\n");
 			printf("B = Breakpoint menu | G = \"Go\" or Run program  | Q = Quit program | R = Register File Menu\n");
-			printf("M = Memory Menu     | S = Sanity check Options | L = Load program\n");
+			printf("M = Memory Menu     | S = Sanity check Options | L = Load program | X = Close Porgram\n");
 			break;
 
 		default:
@@ -188,8 +193,8 @@ void change_reg_content()
 		printf("Input the new 16-bit hex value to be placed in R%d:\t0x", reg_num);
 		scanf_s(" %x", &new_reg_value);
 
-		if (new_reg_value > MAX_16_BIT_VALUE) {
-			printf("Invalid register value.\n");
+		if (new_reg_value >= MAX_16_BIT_VALUE) {
+			printf("Value is too large to be placed in a register.\n");
 		}
 		else {
 			REG_CON_table[REG][reg_num] = new_reg_value;
@@ -291,15 +296,15 @@ void change_mem_content()
 		printf("Input the new 8-bit hex number to be placed in 0x%04X:\t0x", mem_loc);
 		scanf_s(" %x", &new_mem_value);
 
-		if (new_mem_value > MAX_8_BIT_VALUE) {
-			printf("Invalid register value.\n");
+		if (new_mem_value >= MAX_8_BIT_VALUE) {
+			printf("Value is too large to be placed in memory.\n");
 		}
 		else {
 			memory.byte[mem_loc] = new_mem_value;
 		}
 	}
 	else {
-		printf("Invalid register number.\n");
+		printf("Invalid memory location.\n");
 	}
 }
 
@@ -361,6 +366,32 @@ void sanity_check_options()
 			printf("Not a valid option.\n");
 			break;
 		}
+	}
+}
+
+void close_program()
+{
+	char user_response;
+	printf("This option clears the contents in the memory (does not affect register contents).\n Are you sure you want to wish to close %s? (Y/N)\t", program_name);
+	scanf_s(" %c", &user_response, 1);
+	user_response = toupper(user_response);
+
+	switch (user_response)
+	{
+	case ('Y'):
+		printf("Closing program . . . . .  ");
+		memset(memory.byte, 0, sizeof(memory.byte));
+		program_name[0] = '\0';
+		printf("Program has been successfully closed.\n\n");
+		break;
+
+	case ('N'):
+		printf("Program closing has been cancelled.\n\n");
+		break;
+
+	default:
+		printf("Invalid input. Program closing has been cancelled.\n\n");
+		break;
 	}
 }
 

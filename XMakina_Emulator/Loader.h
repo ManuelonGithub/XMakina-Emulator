@@ -14,8 +14,7 @@
 #ifndef LOADER_H
 #define LOADER_H
 
-#define S_RECORD_MAX_SIZE 510			// this value comes from the S-record document, where it states that it can assumed that an S-Record will not exceed 510 characters
-#define HIGH_BYTE_SHIFT(x) (x*(1 << 8))
+#define S_RECORD_MAX_SIZE 510			// this value comes from the S-record documentation, where it states that it can assumed that an S-Record will not exceed 510 characters
 #define DATA_POS 8
 
 enum RECORD_VALIDATION_CODES { VALID_RECORD = 1, CHECKSUM_ERROR = -1, S_RECORD_ERROR = -2};

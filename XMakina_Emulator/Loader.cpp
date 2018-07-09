@@ -10,6 +10,7 @@
 
 #include "stdafx.h"
 #include "Loader.h"
+#include "XMakina_Emulator_entities.h"
 
 
 /* Loader Function: 
@@ -18,6 +19,8 @@
  */
 void loader()
 {
+	printf("\n~=~=~=~=~=~=~=~=~=~=~=~=~ Loader ~=~=~=~=~=~=~=~=~=~=~=~=~=~\n\n");
+
 	char filename[100];
 
 	printf("file name: ");
@@ -25,7 +28,7 @@ void loader()
 
 	FILE * s_record_file;
 	if (fopen_s(&s_record_file, filename, "r") != 0) {
-		printf("Error opening S-Record file. \n");
+		printf("Error opening S-Record file. \n\n");
 		return;
 	}
 
@@ -33,12 +36,14 @@ void loader()
 
 	while (fgets(s_record, S_RECORD_MAX_SIZE, s_record_file)) {
 		if (s_record_decoder(s_record) == CHECKSUM_ERROR) {
-			printf("S-Record checksum error. \n");
+			printf("S-Record checksum error. \n\n");
 			return;
 		}
 	}
 
 	fclose(s_record_file);
+
+	printf("\n\n");
 }
 
 
@@ -63,18 +68,17 @@ int s_record_decoder(char * s_record)
 		return S_RECORD_ERROR;
 	}
 
-	/* 
-	 * Initializing the address that the s-record is loading from.
+	/* Initializing the address that the s-record is loading from.
 	 * This value also indicates the starting address if the record is type 9,
 	 * and is used when retrieving the program name for type 0 records, since it will always be 0 for that record type.
 	 * The initialization is split in two parts so the data retrieved can be easily added to the validation sum.
 	 */
-	sscanf_s(&s_record[4], "%2x", &data);		// "Loading" the address high-byte
+	sscanf_s(&s_record[4], "%2x", &data);	// "Loading" the address high-byte
 	loaded_address = HIGH_BYTE_SHIFT(data);	// This multiplication is equivalent to a left byte shift.
 	validation_sum += data;
 
-	sscanf_s(&s_record[6], "%2x", &data);		// "Loading" the address low-byte
-	loaded_address += data;						// Since loaded address is initialized to 0, This addition is equivalent to a bitwise OR.
+	sscanf_s(&s_record[6], "%2x", &data);	// "Loading" the address low-byte
+	loaded_address += data;					// Since loaded address is initialized to 0, This addition is equivalent to a bitwise OR.
 	validation_sum += data;
 
 	sscanf_s(&s_record[(DATA_POS + (hex_pair_count - 3) * 2)], "%2x", &checksum);	// Retrieves the checksum hex pair from record.
@@ -98,7 +102,7 @@ int s_record_decoder(char * s_record)
 		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {	// This reads the characters pertaining to the program name
 			program_name[loaded_address++] = s_record[i];
 		}
-		checksum = ~validation_sum & 0xFF;
+		checksum = ~validation_sum & LOW_BYTE_MASK;
 		break;
 
 	default:

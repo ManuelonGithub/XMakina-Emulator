@@ -56,4 +56,12 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="whole_ISA_test.xme">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Reg_ini_and_direct_memory_access_test.xme">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

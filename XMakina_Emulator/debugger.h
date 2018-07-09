@@ -15,13 +15,16 @@
 #define DEBUGGER_H
 
 extern union XMakina_memory memory;
-extern union XMakina_register_file register_file;
 extern char program_name[MAX_PROG_NAME_SIZE];
+extern unsigned short MAR;
+extern unsigned short MBR;
+extern union XMakina_instruction_set instruction;
+extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
 
 #define MAX_16_BIT_VALUE (1 << 16)
-#define MAX_8_BIT_VALUE (1 << 16)
+#define MAX_8_BIT_VALUE (1 << 8)
 
-enum DEBUGGER_MENU_OPTIONS {BREAKPOINT_MENU = 'B', RUN_PROGRAM = 'G', QUIT_PROGRAM = 'Q', REG_FILE_OPTIONS = 'R', MEMORY_MENU = 'M', SANITY_CHECK_OPTIONS = 'S', LOAD_PROGRAM = 'L'};
+enum DEBUGGER_MENU_OPTIONS {BREAKPOINT_MENU = 'B', RUN_PROGRAM = 'G', CLOSE_PROGRAM = 'X', QUIT_EMULATOR = 'Q', REG_FILE_OPTIONS = 'R', MEMORY_MENU = 'M', SANITY_CHECK_OPTIONS = 'S', LOAD_PROGRAM = 'L'};
 enum BREAKPOINT_MENU {VIEW_CURRENT_BREAKPOINTS = 'V', SET_MEM_BREAKPOINT = 'M', SET_CLOCK_OFFSET_BREAKPOINT = 'O', PRIORITY_CHANGE_BREAKPOINT = 'P'};
 enum VIEW_REG_FILE_OPTIONS {CHANGE_REG_VALUE = 'C'};
 enum VIEW_MEMORY_MENU {TOP_BOTTOM_LIMIT_MEM_VIEW = 'L', BASE_AND_OFFSET_MEM_VIEW = 'O', CHANGE_MEM_VALUE = 'C'};

@@ -169,6 +169,10 @@
   <ItemGroup>
     <Text Include="S_Record_test.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Reg_ini_and_direct_memory_access_test.xme" />
+    <None Include="whole_ISA_test.xme" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
