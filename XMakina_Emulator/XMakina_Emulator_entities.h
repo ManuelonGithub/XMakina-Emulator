@@ -106,7 +106,7 @@ struct relative_memory_access_instruction {
 	unsigned short destination_reg : 3;
 	unsigned short source : 3;
 	unsigned short word_byte_control : 1;
-	unsigned short offset : 6;
+	signed short offset : 6;
 	unsigned short inst_code : 1;
 	unsigned short inst_category : 2;
 };

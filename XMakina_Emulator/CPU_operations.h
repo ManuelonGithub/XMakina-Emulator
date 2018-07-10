@@ -68,8 +68,8 @@ char execute(char instruction_type);
 void device_management();
 void debugger_tiggers();
 
-void bus(unsigned short MAR, unsigned short * MBR, char byte_word_control, char read_write_control);
-void device_memory_access(unsigned short MAR, unsigned short * MBR, char byte_word_control, char read_write_control);
+void bus(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control);
+void device_memory_access(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control);
 
 void interrupt_return_process();
 
@@ -84,13 +84,15 @@ char BGE(signed short label);
 char BLT(signed short label);
 char BAL(signed short label);
 
-char MOVL(unsigned short dst_reg, unsigned short value);
-char MOVLZ(unsigned short dst_reg, unsigned short value);
-char MOVH(unsigned short dst_reg, unsigned short value);
+char MOVL(char dst_reg, unsigned short value);
+char MOVLZ(char dst_reg, unsigned short value);
+char MOVH(char dst_reg, unsigned short value);
 
-char LD(unsigned short action, unsigned short word_byte_control, unsigned short src_reg, unsigned short dst_reg);
-char ST(unsigned short action, unsigned short word_byte_control, unsigned short src_reg, unsigned short dst_reg);
+char LD(char action, char word_byte_control, char src_reg, char dst_reg);
+char ST(char action, char word_byte_control, char src_reg, char dst_reg);
 
+char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg);
+char STR(signed short offset, char word_byte_control, char src_reg, char dst_reg);
 
 #endif // !CPU_OPERATIONS_H
 
