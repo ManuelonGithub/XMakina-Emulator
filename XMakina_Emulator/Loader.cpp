@@ -9,8 +9,8 @@
  */
 
 #include "stdafx.h"
-#include "Loader.h"
 #include "XMakina_Emulator_entities.h"
+#include "Loader.h"
 
 
 /* Loader Function: 

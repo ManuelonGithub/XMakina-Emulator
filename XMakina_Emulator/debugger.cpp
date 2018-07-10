@@ -10,8 +10,9 @@
 
 #include "stdafx.h"
 #include "XMakina_Emulator_entities.h"
-#include "Loader.h"
 #include "debugger.h"
+#include "Loader.h"
+#include "CPU_operations.h"
 
 
 /* Debugger Main Menu function:
@@ -82,10 +83,15 @@ char debugger_main_menu()
 			loader();
 			break;
 
+		case (INST_OPCODE_TEST):
+			test_inst_opcode();
+			break;
+
 		case (MENU_HELP):
 			printf("Main Menu options:\n");
 			printf("B = Breakpoint menu | G = \"Go\" or Run program  | Q = Quit program | R = Register File Menu\n");
 			printf("M = Memory Menu     | S = Sanity check Options | L = Load program | X = Close Porgram\n");
+			printf("I = Instruction Opcode testing\n");
 			break;
 
 		default:
@@ -383,6 +389,8 @@ void sanity_check_options()
  */
 void close_program()
 {
+	printf("\n=~=~=~=~=~ Xmakina Debugger: Close Program ~=~=~=~~=~=~=~=~=\n");
+
 	char user_response;
 	printf("This option clears the contents in the memory (does not affect register contents).\n Are you sure you want to wish to close %s? (Y/N)\t", program_name);
 	scanf_s(" %c", &user_response, 1);
@@ -407,3 +415,51 @@ void close_program()
 	}
 }
 
+void test_inst_opcode()
+{
+	printf("\n=~=~=~=~=~ Xmakina Debugger: Instruction Opcode testing ~=~=\n\n");
+
+	char user_response, run_status, decoded_inst_type;
+	unsigned int inst;
+
+
+	printf("This option allows you to test a single instruction opcode.\n");
+	printf("It is a bare-bones function that WILL modify the contents in memory and in the register file.\n");
+	printf("It will also automatically enable program stepping (disabling option in the breakpoint options).\n");
+	printf("\n Do you wish to continue? (Y/N)\t");
+	scanf_s(" %c", &user_response, 1);
+	user_response = toupper(user_response);
+
+	switch (user_response)
+	{
+	case ('Y'):
+		printf("\nPlease enter instruction opcode:\t");
+		scanf_s("%x", &inst, 1);
+
+		/*********************** Mini CPU cycle ***********************/
+
+		IX = inst;
+		decoded_inst_type = decode();
+
+		if (decoded_inst_type == INVALID_INST) {
+			printf("Invalid Instruction Opcode (= 0x%04X).\n", IX);
+			break;
+		}
+
+		run_status = execute(decoded_inst_type);
+
+		if (run_status == INVALID_INST) {
+			printf("Invalid Instruction Opcode (= 0x%04X).\n", IX);
+		}
+
+		break;
+
+	case ('N'):
+		printf("Instruction opcode testing has been cancelled.\n\n");
+		break;
+
+	default:
+		printf("Invalid input. Instruction opcode testing has been cancelled.\n\n");
+		break;
+	}
+}
