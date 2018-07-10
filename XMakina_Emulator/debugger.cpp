@@ -31,7 +31,6 @@ char debugger_main_menu()
 		if (strlen(program_name) == 0) {
 			printf("No program loaded.\n\n");
 		}
-
 		else {
 			printf("%s program has been loaded.\n\n", program_name);
 		}
@@ -42,7 +41,7 @@ char debugger_main_menu()
 		scanf_s(" %c", &menu_option, 1);
 		menu_option = toupper(menu_option);
 
-		printf("\n\n");
+		printf("\n");
 
 		switch (menu_option)
 		{
@@ -84,7 +83,7 @@ char debugger_main_menu()
 			break;
 
 		case (MENU_HELP):
-			printf("\nMain Menu options:\n");
+			printf("Main Menu options:\n");
 			printf("B = Breakpoint menu | G = \"Go\" or Run program  | Q = Quit program | R = Register File Menu\n");
 			printf("M = Memory Menu     | S = Sanity check Options | L = Load program | X = Close Porgram\n");
 			break;
@@ -93,6 +92,8 @@ char debugger_main_menu()
 			printf("Not a valid menu option.\n");
 			break;
 		}
+
+		printf("\n\n");
 	}
 }
 
@@ -103,12 +104,10 @@ char debugger_main_menu()
 void breakpoint_menu()
 {
 	char menu_option;
-	printf("\n=~=~=~=~=~ Xmakina Debugger: Breakpoint Menu ~=~=~=~=~=~=~=~\n");
+	printf("\n=~=~=~=~=~ Xmakina Debugger: Breakpoints ~=~=~=~=~=~=~=~=~=~\n\n");
 
 	printf("\nInput your option (Input H for menu options):\t");
 	scanf_s(" %c", &menu_option, 1);
-	getchar();
-
 	menu_option = toupper(menu_option);
 
 	while (1) {
@@ -158,8 +157,9 @@ void reg_file_options()
 		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
 		printf("Input:\t");
 		scanf_s(" %c", &option, 1);
-
 		option = toupper(option);
+
+		printf("\n");
 
 		switch (option)
 		{
@@ -175,6 +175,8 @@ void reg_file_options()
 			printf("Not a valid option.\n");
 			break;
 		}
+
+		printf("\n");
 	}
 }
 
@@ -214,12 +216,13 @@ void memory_menu()
 	char menu_option;
 
 	while (1) {
-		printf("\n=~=~=~=~=~ Xmakina Debugger: Memory Menu ~=~=~=~=~=~=~=~=~=~\n");
+		printf("\n=~=~=~=~=~ Xmakina Debugger: Memory ~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
-		printf("\nMEMORY MENU: Input your option (Input H for menu options):\t");
+		printf("MEMORY MENU: Input your option (Input H for menu options):\t");
 		scanf_s(" %c", &menu_option, 1);
-
 		menu_option = toupper(menu_option);
+
+		printf("\n");
 
 		switch (menu_option)
 		{
@@ -251,6 +254,8 @@ void memory_menu()
 			printf("Not a valid option.\n");
 			break;
 		}
+
+		printf("\n");
 	}
 }
 
@@ -337,10 +342,10 @@ void sanity_check_options()
 	printf("\n=~=~=~=~=~ Xmakina Debugger: Sanity Check Options ~=~=~=~=~=\n");
 
 	printf("Input your option (Input H for menu options):\t");
-	scanf_s("%c", &menu_option, 1);
-	getchar();
-
+	scanf_s(" %c", &menu_option, 1);
 	menu_option = toupper(menu_option);
+
+	printf("\n\n");
 
 	while (1) {
 		switch (menu_option)
@@ -369,6 +374,13 @@ void sanity_check_options()
 	}
 }
 
+
+/* Close Program process:
+ * This allows the user to erase the contents of the XMakina memory,
+ * which results in the erasure of the loaded program.
+ * The user can use this feature to load a new program without needing to exit out of the emulation.
+ * FUTURE WORK: Erase registers and emulation entities as well
+ */
 void close_program()
 {
 	char user_response;
