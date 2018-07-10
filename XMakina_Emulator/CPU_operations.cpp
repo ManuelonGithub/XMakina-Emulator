@@ -9,13 +9,9 @@
 */
 
 #include "stdafx.h"
-#include "XMakina_Emulator_entities.h"
 #include "CPU_operations.h"
+#include "Bus_Devices_Interrupt_operations.h"
 
-
-char (*conditional_branching_execution[]) (signed short) = { BEQ_BZ, BNE_BNZ, BC_BHS, BNC_BLO, BN, BGE, BLT, BAL };
-char (*register_initialization_execution[]) (char, unsigned short) = { MOVL, MOVLZ, MOVH };
-char(*direct_memory_access_execution[]) (char, char, char, char) = { LD, ST };
 
 /* Notes on CPU Operation:
  * PROCESS_FAILURE/PROCESS_SUCCESS are general output flags used through the several steps of a CPU cycle.
@@ -45,8 +41,10 @@ char fetch()
 		MAR = PC;
 		bus(MAR, &MBR, WORD, READ);
 		IX = MBR;
-		PC += WORD_STEP;
+		PC += PC_WORD_STEP;
 	}
+
+	System_clk += NORMAL_OP_CLK_INC;
 
 	return PROCESS_SUCCESS;
 }
@@ -164,225 +162,6 @@ char execute(char instruction_type)
 	}
 }
 
-/****************** Branching with Link Instruction ******************/
-char BL(signed short label)
-{
-	printf("Executing a BL instruction.\n");
-	LR = PC;
-	PC += label;
-	return PROCESS_SUCCESS;
-}
-
-
-/***************** Conditional Branching Instructions ****************/
-char BEQ_BZ(signed short label)
-{
-	printf("Executing a BEQ/BZ instruction.\n");
-	PC += (PSW_Z == true) ? label : NO_INC;
-	return PROCESS_SUCCESS;
-}
-
-char BNE_BNZ(signed short label)
-{
-	printf("Executing a BNE/BNZ instruction.\n");
-	PC += (PSW_Z == false) ? label : NO_INC;
-	return PROCESS_SUCCESS;
-}
-
-char BC_BHS(signed short label)
-{
-	printf("Executing a BC/BHS instruction.\n");
-	PC += (PSW_C == true) ? label : NO_INC;
-	return PROCESS_SUCCESS;
-}
-
-char BNC_BLO(signed short label)
-{
-	printf("Executing a BNC/BLO instruction.\n");
-	PC += (PSW_C == false) ? label : NO_INC;
-	return PROCESS_SUCCESS;
-}
-
-char BN(signed short label)
-{
-	printf("Executing a BN instruction.\n");
-	PC += (PSW_Z == true) ? label : WORD_STEP;
-	return PROCESS_SUCCESS;
-}
-
-char BGE(signed short label)
-{
-	printf("Executing a BGE instruction.\n");
-	PC += ((PSW_Z | PSW_V) == true) ? label : NO_INC;
-	return PROCESS_SUCCESS;
-}
-
-char BLT(signed short label)
-{
-	printf("Executing a BLT instruction.\n");
-	PC += ((PSW_Z | PSW_V) == true) ? label : NO_INC;
-	return PROCESS_SUCCESS;
-}
-
-char BAL(signed short label)
-{
-	printf("Executing a BAL instruction.\n");
-	PC += label;
-	return PROCESS_SUCCESS;
-}
-
-
-/*********************** Register Initialization **********************/
-char MOVL(char dst_reg, unsigned short value)
-{
-	printf("Executing a MOVL instruction.\n");
-	//value |= (REG_CON_table[REG][dst_reg] & 0xFF00);	//
-	REG_CON_table[REG][dst_reg] = (REG_CON_table[REG][dst_reg] & HIGH_BYTE_MASK) | (value & LOW_BYTE_MASK);
-	return PROCESS_SUCCESS;
-}
-
-char MOVLZ(char dst_reg, unsigned short value)
-{
-	printf("Executing a MOVLZ instruction.\n");
-	REG_CON_table[REG][dst_reg] = value;
-	return PROCESS_SUCCESS;
-}
-
-char MOVH(char dst_reg, unsigned short value)
-{
-	printf("Executing a MOVH instruction.\n");
-	//value <<= 8;										//
-	//value |= (REG_CON_table[REG][dst_reg] & 0x00FF);	//
-	REG_CON_table[REG][dst_reg] = (REG_CON_table[REG][dst_reg] & LOW_BYTE_MASK) | (HIGH_BYTE_SHIFT(value) & HIGH_BYTE_MASK);
-	return PROCESS_SUCCESS;
-}
-
-
-/************************ Direct Memory Accessing *********************/
-char LD(char action, char word_byte_control, char src_reg, char dst_reg)
-{
-	printf("Executing a LD instruction.\n");
-
-	switch (action)
-	{
-	case (NO_ACTION):
-		MAR = REG_CON_table[REG][src_reg];
-		break;
-
-	case (POST_INCREMEMT):
-		MAR = REG_CON_table[REG][src_reg];
-		REG_CON_table[REG][src_reg] += (WORD_STEP - word_byte_control);
-		break;
-
-	case (POST_DECREMENT):
-		MAR = REG_CON_table[REG][src_reg];
-		REG_CON_table[REG][src_reg] -= (WORD_STEP - word_byte_control);
-		break;
-
-	case (PRE_INCREMENT):
-		REG_CON_table[REG][src_reg] += (WORD_STEP - word_byte_control);
-		MAR = REG_CON_table[REG][src_reg];
-		break;
-
-	case (PRE_DECREMENT):
-		REG_CON_table[REG][src_reg] -= (WORD_STEP - word_byte_control);
-		MAR = REG_CON_table[REG][src_reg];
-		break;
-
-	default:
-		return PROCESS_FAILURE;
-		break;
-	}
-
-	bus(MAR, &MBR, word_byte_control, READ);
-	REG_CON_table[REG][dst_reg] = (word_byte_control == WORD) ? MBR : (REG_CON_table[REG][dst_reg] & LOW_BYTE_MASK) | (MBR & LOW_BYTE_MASK);
-
-	return PROCESS_SUCCESS;
-}
-
-char ST(char action, char word_byte_control, char src_reg, char dst_reg)
-{
-	printf("Executing a ST instruction.\n");
-
-	switch (action)
-	{
-	case (NO_ACTION):
-		MAR = REG_CON_table[REG][dst_reg];
-		break;
-
-	case (POST_INCREMEMT):
-		MAR = REG_CON_table[REG][dst_reg];
-		REG_CON_table[REG][dst_reg] += (WORD_STEP - word_byte_control);
-		break;
-
-	case (POST_DECREMENT):
-		MAR = REG_CON_table[REG][dst_reg];
-		REG_CON_table[REG][dst_reg] -= (WORD_STEP - word_byte_control);
-		break;
-
-	case (PRE_INCREMENT):
-		REG_CON_table[REG][dst_reg] += (WORD_STEP - word_byte_control);
-		MAR = REG_CON_table[REG][dst_reg];
-		break;
-
-	case (PRE_DECREMENT):
-		REG_CON_table[REG][dst_reg] -= (WORD_STEP - word_byte_control);
-		MAR = REG_CON_table[REG][dst_reg];
-		break;
-
-	default:
-		return PROCESS_FAILURE;
-		break;
-	}
-
-	MBR = REG_CON_table[REG][src_reg];
-	bus(MAR, &MBR, word_byte_control, WRITE);
-
-	return PROCESS_SUCCESS;
-}
-
-char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
-{
-	return 0;
-}
-
-char STR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
-{
-	return 0;
-}
-
-void device_management()
-{
-}
-
 void debugger_tiggers()
-{
-}
-
-void bus(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control)
-{
-	if (MAR < DEVICE_MEMORY_SPACE) {
-		device_memory_access(MAR, MBR, word_byte_control, read_write_control);
-	}
-	else {
-		if (read_write_control == READ) {
-			*MBR = (word_byte_control == WORD) ? memory.word[WORD_ADDR_CONV(MAR)] : memory.byte[MAR];
-		}
-		else {
-			if (word_byte_control == WORD) {
-				memory.word[WORD_ADDR_CONV(MAR)] = *MBR;
-			}
-			else {
-				memory.byte[MAR] = (unsigned char)* MBR;
-			}
-		}
-	}
-}
-
-void device_memory_access(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control)
-{
-}
-
-void interrupt_return_process()
 {
 }

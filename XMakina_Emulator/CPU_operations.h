@@ -9,14 +9,13 @@
 */
 
 #include "XMakina_Emulator_entities.h"
+#include "Branching_instructions.h"
+#include "Single_Register_manipulation_and_initialization_instructions.h"
+#include "Memory_access_instructions.h"
 
 #pragma once
 #ifndef CPU_OPERATIONS_H
 #define CPU_OPERATIONS_H
-
-#define BYTE_STEP 1
-#define WORD_STEP (BYTE_STEP*2)
-#define NO_INC 0
 
 #define INST_CATEGORY(INST) ((INST & 0xC000) >> 14)
 
@@ -29,12 +28,11 @@
 #define REG_INIT_INST_CODE_START 2
 #define RELATIVE_MEMORY_ACCESS_INST_TYPE(INST) ((INST & 0x2000) >> 13)
 
-enum PROCESS_FLAGS { PROCESS_FAILURE, PROCESS_SUCCESS};
-enum BUS_CONTROLS { WORD = 0, BYTE = 1, READ = 0, WRITE = 1};
 enum INST_CATEGORY {BRANCHING, ALU, MEM_ACCESS_AND_REG_INIT, MEM_ACCESS_REL};
 enum INST_TYPES { INVALID_INST = -1, BRANCH_WITH_LINK_INST, CONDITIONAL_BRANCH_INST, TWO_OPERAND_INST, 
 					SINGLE_REGISTER_INST, DIRECT_MEMORY_ACCESS_INST, REGISTER_INITIALIZATION_INST, RELATIVE_MEMORY_ACCESS_INST};
-enum DIRECT_MEMORY_ACCESS_ACTION { NO_ACTION, POST_INCREMEMT, POST_DECREMENT, PRE_INCREMENT = 5, PRE_DECREMENT};
+
+extern unsigned int System_clk;
 
 extern union XMakina_memory memory;
 extern unsigned short MAR;
@@ -42,57 +40,27 @@ extern unsigned short MBR;
 extern union XMakina_instruction_set instruction;
 extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
 
-//struct branching_category {
-//	unsigned short operand : 10;
-//	unsigned short ext_info : 3;
-//	unsigned short is_not_BL : 1;
-//	unsigned short inst_category : 2;
-//};
+union XMakina_instruction_set {
+	unsigned short opcode;
+	struct branch_with_link_instruction subr_br;
+	struct conditional_branch_instruction cond_br;
+	struct two_operand_instruction two_operand;
+	struct single_register_instruction single_reg;
+	struct direct_memory_access_instruction dir_mem_access;
+	struct register_initialization_instruction reg_init;
+	struct relative_memory_access_instruction rel_mem_access;
+};
 
-//struct ALU_category {
-//	unsigned short operands : 8;
-//	unsigned short is_single_reg : 1;
-//	unsigned short inst_code : 5;
-//	unsigned short inst_category : 2;
-//};
-
-//struct mem_access_reg_init_category {
-//	unsigned short operands : 11;
-//	unsigned short inst_code : 3;
-//	unsigned short inst_category : 2;
-//};
+extern char (*conditional_branching_execution[]) (signed short);
+extern char (*register_initialization_execution[]) (char, unsigned short);
+extern char (*direct_memory_access_execution[]) (char, char, char, char);
+extern char (*relative_memory_access_execution[]) (signed short, char, char, char);
 
 char fetch();
 char decode();
 char execute(char instruction_type);
-void device_management();
+
 void debugger_tiggers();
-
-void bus(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control);
-void device_memory_access(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control);
-
-void interrupt_return_process();
-
-char BL(signed short label);
-
-char BEQ_BZ(signed short label);
-char BNE_BNZ(signed short label);
-char BC_BHS(signed short label);
-char BNC_BLO(signed short label);
-char BN(signed short label);
-char BGE(signed short label);
-char BLT(signed short label);
-char BAL(signed short label);
-
-char MOVL(char dst_reg, unsigned short value);
-char MOVLZ(char dst_reg, unsigned short value);
-char MOVH(char dst_reg, unsigned short value);
-
-char LD(char action, char word_byte_control, char src_reg, char dst_reg);
-char ST(char action, char word_byte_control, char src_reg, char dst_reg);
-
-char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg);
-char STR(signed short offset, char word_byte_control, char src_reg, char dst_reg);
 
 #endif // !CPU_OPERATIONS_H
 

@@ -33,6 +33,18 @@
     <ClInclude Include="CPU_operations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Branching_instructions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory_access_instructions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Single_Register_manipulation_and_initialization_instructions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bus_Devices_Interrupt_operations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -48,6 +60,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CPU_operations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Branching_instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory_access_instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Single_Register_manipulation_and_initialization_instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bus_and_Device_operations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

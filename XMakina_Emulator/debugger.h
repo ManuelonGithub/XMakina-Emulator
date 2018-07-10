@@ -20,6 +20,7 @@ extern unsigned short MAR;
 extern unsigned short MBR;
 extern union XMakina_instruction_set instruction;
 extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
+extern union PSW_word PSW;
 
 #define MAX_16_BIT_VALUE (1 << 16)
 #define MAX_8_BIT_VALUE (1 << 8)

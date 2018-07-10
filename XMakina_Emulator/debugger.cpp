@@ -27,7 +27,7 @@ char debugger_main_menu()
 	char menu_option;
 
 	while (1) {
-		printf("\n=~=~=~=~=~ Xmakina Debugger: Main Menu ~=~=~=~=~=~=~=~=~=~=~\n\n");
+		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Main Menu ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 		if (strlen(program_name) == 0) {
 			printf("No program loaded.\n\n");
@@ -42,7 +42,7 @@ char debugger_main_menu()
 		scanf_s(" %c", &menu_option, 1);
 		menu_option = toupper(menu_option);
 
-		printf("\n");
+		printf("\n\n");
 
 		switch (menu_option)
 		{
@@ -91,7 +91,7 @@ char debugger_main_menu()
 			printf("Main Menu options:\n");
 			printf("B = Breakpoint menu | G = \"Go\" or Run program  | Q = Quit program | R = Register File Menu\n");
 			printf("M = Memory Menu     | S = Sanity check Options | L = Load program | X = Close Porgram\n");
-			printf("I = Instruction Opcode testing\n");
+			printf("I = Instruction Opcode testing\n\n");
 			break;
 
 		default:
@@ -99,7 +99,7 @@ char debugger_main_menu()
 			break;
 		}
 
-		printf("\n\n");
+		printf("\n");
 	}
 }
 
@@ -110,7 +110,7 @@ char debugger_main_menu()
 void breakpoint_menu()
 {
 	char menu_option;
-	printf("\n=~=~=~=~=~ Xmakina Debugger: Breakpoints ~=~=~=~=~=~=~=~=~=~\n\n");
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Breakpoints ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	printf("\nInput your option (Input H for menu options):\t");
 	scanf_s(" %c", &menu_option, 1);
@@ -154,10 +154,10 @@ void reg_file_options()
 	char option;
 
 	while (1) {
-		printf("\n=~=~=~=~=~ Xmakina Debugger: Register File ~=~=~=~=~=~=~=~=~\n\n");
+		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Register File ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 		for (i = 0; i < XMAKINA_CPU_REG_COUNT; i++) {
-			printf("R%d : 0x%04x\n", i, REG_CON_table[REG][i]);
+			printf("R%d : 0x%04X\n", i, REG_CON_table[REG][i]);
 		}
 
 		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
@@ -211,6 +211,8 @@ void change_reg_content()
 	else {
 		printf("Invalid register number.\n");
 	}
+
+	printf("\n");
 }
 
 /* Memory menu function:
@@ -222,7 +224,7 @@ void memory_menu()
 	char menu_option;
 
 	while (1) {
-		printf("\n=~=~=~=~=~ Xmakina Debugger: Memory ~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
+		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Memory  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 		printf("MEMORY MENU: Input your option (Input H for menu options):\t");
 		scanf_s(" %c", &menu_option, 1);
@@ -285,9 +287,13 @@ void top_bottom_memory_view()
 		}
 		else {
 			printf("\nMemory contents from 0x%04X to 0x%04X:\n\n", bottom_lim, top_lim);
+			printf("\t--------------------------\n");
+			printf("\t|  Address  |  Contents  |\n");
+			printf("\t--------------------------\n");
 			for (i = bottom_lim; i <= top_lim; i++) {
-				printf("Address: 0x%04X  ->  Contents: 0x%02X\n", i, memory.byte[i]);
+				printf("\t|  0x%04X   |    0x%02X    |\n", i, memory.byte[i]);
 			}
+			printf("\t--------------------------\n\n");
 		}
 	}
 }
@@ -317,6 +323,8 @@ void change_mem_content()
 	else {
 		printf("Invalid memory location.\n");
 	}
+
+	printf("\n");
 }
 
 //void base_offset_memory_view()
@@ -345,7 +353,7 @@ void change_mem_content()
 void sanity_check_options()
 {
 	char menu_option;
-	printf("\n=~=~=~=~=~ Xmakina Debugger: Sanity Check Options ~=~=~=~=~=\n");
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Sanity Check Options  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	printf("Input your option (Input H for menu options):\t");
 	scanf_s(" %c", &menu_option, 1);
@@ -389,7 +397,7 @@ void sanity_check_options()
  */
 void close_program()
 {
-	printf("\n=~=~=~=~=~ Xmakina Debugger: Close Program ~=~=~=~~=~=~=~=~=\n");
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Close Program ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	char user_response;
 	printf("This option clears the contents in the memory (does not affect register contents).\n Are you sure you want to wish to close %s? (Y/N)\t", program_name);
@@ -417,7 +425,8 @@ void close_program()
 
 void test_inst_opcode()
 {
-	printf("\n=~=~=~=~=~ Xmakina Debugger: Instruction Opcode testing ~=~=\n\n");
+	//printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Main Menu ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Instruction Opcode testing  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	char user_response, run_status, decoded_inst_type;
 	unsigned int inst;
@@ -426,7 +435,7 @@ void test_inst_opcode()
 	printf("This option allows you to test a single instruction opcode.\n");
 	printf("It is a bare-bones function that WILL modify the contents in memory and in the register file.\n");
 	printf("It will also automatically enable program stepping (disabling option in the breakpoint options).\n");
-	printf("\n Do you wish to continue? (Y/N)\t");
+	printf("\nDo you wish to continue? (Y/N)\t");
 	scanf_s(" %c", &user_response, 1);
 	user_response = toupper(user_response);
 
@@ -434,7 +443,7 @@ void test_inst_opcode()
 	{
 	case ('Y'):
 		printf("\nPlease enter instruction opcode:\t");
-		scanf_s("%x", &inst, 1);
+		scanf_s("%x", &inst);
 
 		/*********************** Mini CPU cycle ***********************/
 
@@ -442,24 +451,26 @@ void test_inst_opcode()
 		decoded_inst_type = decode();
 
 		if (decoded_inst_type == INVALID_INST) {
-			printf("Invalid Instruction Opcode (= 0x%04X).\n", IX);
+			printf("Invalid Instruction Opcode (= 0x%04X).\n\n", IX);
 			break;
 		}
 
 		run_status = execute(decoded_inst_type);
 
 		if (run_status == INVALID_INST) {
-			printf("Invalid Instruction Opcode (= 0x%04X).\n", IX);
+			printf("Invalid Instruction Opcode (= 0x%04X).\n\n", IX);
 		}
+
+		/*printf("\n");*/
 
 		break;
 
 	case ('N'):
-		printf("Instruction opcode testing has been cancelled.\n\n");
+		printf("\nInstruction opcode testing has been cancelled.\n\n");
 		break;
 
 	default:
-		printf("Invalid input. Instruction opcode testing has been cancelled.\n\n");
+		printf("\nInvalid input. Instruction opcode testing has been cancelled.\n\n");
 		break;
 	}
 }

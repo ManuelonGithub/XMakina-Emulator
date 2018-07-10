@@ -15,6 +15,10 @@
 #define HIGH_BYTE_SHIFT(x) (x*(1 << 8))
 #define LOW_BYTE_MASK 0x00FF
 #define HIGH_BYTE_MASK 0xFF00
+#define LOW_BYTE_OVERWRITE(dst, value) ((dst & HIGH_BYTE_MASK) | (value & LOW_BYTE_MASK))
+#define HIGH_BYTE_OVERWRITE(dst, value) ((dst & LOW_BYTE_MASK) | (value & HIGH_BYTE_MASK))
+#define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
+#define BIT_CHECK(src, bit) ((src >> bit) & 1)
 
 #define MAX_PROG_NAME_SIZE 30
 
@@ -44,23 +48,18 @@
 
 #define IX (instruction.opcode)
 
+#define PC_BYTE_STEP 1
+#define PC_WORD_STEP (PC_BYTE_STEP*2)
+#define PC_NO_INC 0
+#define MEMORY_ACCESS_CLK_INC 3
+#define NORMAL_OP_CLK_INC 1
+
+enum PROCESS_FLAGS { PROCESS_FAILURE, PROCESS_SUCCESS };
+enum BIT_MANIP { CLEAR, SET };
 
 union XMakina_memory {
 	unsigned char byte[MEM_SIZE_BYTES];
 	unsigned short word[MEM_SIZE_WORDS];
-};
-
-struct branch_with_link_instruction {
-	signed short offset : 13;
-	unsigned short inst_type_signature : 1;
-	unsigned short inst_category : 2;
-};
-
-struct conditional_branch_instruction {
-	signed short offset : 10;
-	unsigned short inst_code : 3;
-	unsigned short inst_type_signature : 1;
-	unsigned short inst_category : 2;
 };
 
 struct two_operand_instruction {
@@ -74,53 +73,20 @@ struct two_operand_instruction {
 	unsigned short inst_category : 2;
 };
 
-struct single_register_instruction {
-	unsigned short destination_reg : 3;
-	unsigned short unused_bits_0 : 3;
-	unsigned short word_byte_control : 1;
-	unsigned short unused_bits_1 : 1;
-	unsigned short inst_type_signature : 1;
-	unsigned short inst_code : 3;
-	unsigned short unused_bits : 2;
-	unsigned short inst_category : 2;
+unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT] =
+{
+	{ 0, 0, 0, 0, 0, 0, 0, 0 },		// Registers 
+	{ 0, 1, 2, 4, 8, 32, 48, -1 }	// Constant  
 };
 
-struct direct_memory_access_instruction {
-	unsigned short destination_reg : 3;
-	unsigned short source : 3;
-	unsigned short word_byte_control : 1;
-	unsigned short unused_bits : 1;
-	unsigned short action : 3;
-	unsigned short inst_code : 3;
-	unsigned short inst_category : 2;
-};
-
-struct register_initialization_instruction {
-	unsigned short destination_reg : 3;
-	unsigned short value : 8;
-	unsigned short inst_code : 3;
-	unsigned short inst_category : 2;
-};
-
-struct relative_memory_access_instruction {
-	unsigned short destination_reg : 3;
-	unsigned short source : 3;
-	unsigned short word_byte_control : 1;
-	signed short offset : 6;
-	unsigned short inst_code : 1;
-	unsigned short inst_category : 2;
-};
-
-union XMakina_instruction_set {
-	unsigned short opcode;
-	struct branch_with_link_instruction subr_br;
-	struct conditional_branch_instruction cond_br;
-	struct two_operand_instruction two_operand;
-	struct single_register_instruction single_reg;
-	struct direct_memory_access_instruction dir_mem_access;
-	struct register_initialization_instruction reg_init;
-	struct relative_memory_access_instruction rel_mem_access;
-};
+//struct PSW_word {
+//	unsigned short C : 1;
+//	unsigned short Z : 1;
+//	unsigned short SLP : 1;
+//	unsigned short V : 1;
+//	unsigned short PRIORITY : 3;
+//	unsigned short unused_bits : 8;
+//};
 
 //struct XMakina_register_identifiers {
 //	unsigned short R0, R1, R2, R3, LR, SP, PSW, PC;
