@@ -157,7 +157,7 @@ void reg_file_options()
 		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Register File ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 		for (i = 0; i < XMAKINA_CPU_REG_COUNT; i++) {
-			printf("R%d : 0x%04X\n", i, reg_file.REG[i]);
+			printf("R%d : 0x%04X\n", i, reg_file.REG[i].word);
 		}
 
 		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
@@ -205,7 +205,7 @@ void change_reg_content()
 			printf("Value is too large to be placed in a register.\n");
 		}
 		else {
-			reg_file.REG[reg_num] = new_reg_value;
+			reg_file.REG[reg_num].word = new_reg_value;
 		}
 	}
 	else {

@@ -55,8 +55,8 @@ char CPU_cycle()
  */
 void fetch()
 {
-	if (reg_file.PC % 2 != 0) {					// Program counter should not have an odd value
-		if (reg_file.PC == LAST_BYTE) {
+	if (reg_file.PC.word % 2 != 0) {					// Program counter should not have an odd value
+		if (reg_file.PC.word == LAST_BYTE) {
 			interrupt_return_process();	// This is the only exception to the rule
 		}
 		else {
@@ -65,10 +65,10 @@ void fetch()
 		}
 	}
 	else {
-		sys_reg.MAR = reg_file.PC;
+		sys_reg.MAR = reg_file.PC.word;
 		bus(sys_reg.MAR, &sys_reg.MBR, WORD, READ);
 		sys_reg.IX.word = sys_reg.MBR;
-		reg_file.PC += PC_WORD_STEP;
+		reg_file.PC.word += PC_WORD_STEP;
 	}
 
 	//emulation.sys_clk += NORMAL_OP_CLK_INC;
@@ -179,8 +179,8 @@ void execute()
 		break;
 
 	case (RELATIVE_MEMORY_ACCESS_INST):
-		printf("Executing a relative memory access instruction.\n");
-		emulation.current_cycle_status = INVALID_INST;
+		emulation.current_cycle_status =
+			(*relative_memory_access_execution[inst_set.RMA->inst_code]) (inst_set.RMA->offset, inst_set.RMA->W_B_ctrl, inst_set.RMA->source, inst_set.RMA->dst_reg);
 		break;
 
 	default:

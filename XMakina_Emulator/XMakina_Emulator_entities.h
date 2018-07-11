@@ -106,13 +106,21 @@ typedef union PSW_reg_format {
 	};
 } PSW_reg_format;
 
+typedef union reg {
+	unsigned short word;
+	struct {
+		unsigned char LSB;
+		unsigned char MSB;
+	};
+} reg;
+
 typedef union XMakina_register_file {
 	struct {
-		unsigned short R0, R1, R2, R3, LR, SP;
+		reg R0, R1, R2, R3, LR, SP;
 		PSW_reg_format PSW;
-		unsigned short PC;
+		reg PC;
 	};
-	unsigned short REG [XMAKINA_CPU_REG_COUNT];
+	reg REG [XMAKINA_CPU_REG_COUNT];
 } XMakina_register_file;
 
 typedef union IX_bit_format {

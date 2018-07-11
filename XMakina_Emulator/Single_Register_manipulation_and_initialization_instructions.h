@@ -7,7 +7,8 @@
 #define SINGLE_REGISTER_MANIPULATION_AND_INITIALIZATION_INSTRUCTIONS_H
 
 #define SINGLE_RIGHT_SHIFT(value) (value >> 1)
-
+#define WORD_LSBi(word) (word & 0x0001)
+#define WORD_MSBi(word) (word & 0x8000)
 
 extern XMakina_register_file reg_file;
 
