@@ -29,24 +29,7 @@
 #define WORD_ADDR_CONV(byte_addr) (byte_addr >> 1)
 #define BYTE_ADDR_CONV(word_addr) (word_addr << 1)
 #define XMAKINA_CPU_REG_COUNT 8
-#define DEVICE_MEMORY_SPACE 16
-
-#define REG_OR_CON 2
-#define REG 0
-#define CON 1
-#define LR (REG_CON_table[REG][4])
-#define SP (REG_CON_table[REG][5])
-#define PSW (REG_CON_table[REG][6])
-#define PC (REG_CON_table[REG][7])
-
-#define PSW_PRIORITY ((PSW & 0x00E0) >> 5)
-#define PSW_V ((PSW & 0x0010) >> 4)
-#define PSW_SLP ((PSW & 0x0008) >> 3)
-#define PSW_N ((PSW & 0x0004) >> 2)
-#define PSW_Z ((PSW & 0x0002) >> 1)
-#define PSW_C (PSW & 0x0001)
-
-#define IX (instruction.opcode)
+#define DEVICE_NUMBER_SUPPORTED 8
 
 #define PC_BYTE_STEP 1
 #define PC_WORD_STEP (PC_BYTE_STEP*2)
@@ -57,44 +40,106 @@
 enum PROCESS_FLAGS { PROCESS_FAILURE, PROCESS_SUCCESS };
 enum BIT_MANIP { CLEAR, SET };
 
-union XMakina_memory {
+typedef struct Device_port {
+	union {
+		unsigned char control;
+		struct {
+			unsigned char IE : 1;
+			unsigned char I_O : 1;
+			unsigned char DBA : 1;
+			unsigned char OV : 1;
+			unsigned char RES : 4;
+		};
+	};
+	unsigned char data;
+} Device_port;
+
+typedef struct Device {
+	Device_port * dev_port;
+	int proc_time;
+	int time_left;
+} Device;
+
+typedef union XMakina_memory {
 	unsigned char byte[MEM_SIZE_BYTES];
 	unsigned short word[MEM_SIZE_WORDS];
-};
+	Device_port dev_port[DEVICE_NUMBER_SUPPORTED];
+} XMakina_memory;
 
-struct two_operand_instruction {
-	unsigned short destination_reg : 3;
+
+/* Two-operand intruction:
+*		- "Destination Register": 3 bits used to determine the destination register used in the execution.
+*		- "source": 3 bits used to determine the source used in the execution. 
+*			A two-operand source can either be a register or a value from the constant value table
+*		- "Word-Byte control": Signals the process to either address the whole word of the operands, or just the Low Byte
+*		- "Register-Constant control": Unique to two-operand. 
+*			Signals the process to either use the register file or the constant value table for the source value.
+*		- "Instruction Category signature": Bit that allows the decoding circuitry to 
+*			distinguish between instruction types that share the same instruction category.
+*		- "Intruction code": Bit(s) that allows the decode/execution circuitry
+*			to distinguish between instructions within the same instrucition type
+*		- Instruction category: The two MSBi's of the instruction opcode.
+*			Instructions within the same category don't necessarely share anything in common,
+*			it's just a way to efficiently decode the instruction opcode.
+*/
+typedef struct two_operand_instruction {
+	unsigned short dst_reg : 3;
 	unsigned short source : 3;
-	unsigned short word_byte_control : 1;
-	unsigned short reg_const_control : 1;
+	unsigned short W_B_ctrl : 1;
+	unsigned short REG_CON_ctrl : 1;
 	unsigned short inst_type_signature : 1;
 	unsigned short inst_code : 4;
-	unsigned short unused_bits : 1;
+	unsigned short unused_bits : 1;			// Bit(s) that aren't used to describe any relevant information in the instruction opcode
 	unsigned short inst_category : 2;
-};
+} two_operand_instruction;
 
-unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT] =
-{
-	{ 0, 0, 0, 0, 0, 0, 0, 0 },		// Registers 
-	{ 0, 1, 2, 4, 8, 32, 48, -1 }	// Constant  
-};
+typedef union PSW_reg_format {
+	unsigned short word;
+	struct {
+		unsigned short C : 1;
+		unsigned short Z : 1;
+		unsigned short N : 1;
+		unsigned short SLP : 1;
+		unsigned short V : 1;
+		unsigned short PRIORITY : 3;
+		unsigned short unused_bits : 8;
+	};
+} PSW_reg_format;
 
-//struct PSW_word {
-//	unsigned short C : 1;
-//	unsigned short Z : 1;
-//	unsigned short SLP : 1;
-//	unsigned short V : 1;
-//	unsigned short PRIORITY : 3;
-//	unsigned short unused_bits : 8;
-//};
+typedef union XMakina_register_file {
+	struct {
+		unsigned short R0, R1, R2, R3, LR, SP;
+		PSW_reg_format PSW;
+		unsigned short PC;
+	};
+	unsigned short REG [XMAKINA_CPU_REG_COUNT];
+} XMakina_register_file;
 
-//struct XMakina_register_identifiers {
-//	unsigned short R0, R1, R2, R3, LR, SP, PSW, PC;
-//};
+typedef union IX_bit_format {
+	unsigned short word;
+	struct {
+		unsigned short undescriptive_0 : 8;
+		unsigned short ALU_cat_sig_bit : 1;
+		unsigned short undescriptive_1 : 2;
+		unsigned short multi_purporse : 3;
+		unsigned short category : 2;
+	} bits;
+} IX_bit_format;
 
-//union XMakina_register_file {
-//	struct XMakina_register_identifiers ID;
-//	unsigned short reg[XMAKINA_CPU_REG_COUNT];
-//};
+typedef struct System_registers {
+	unsigned short MAR;
+	unsigned short MBR;
+	IX_bit_format IX;
+} System_registers;
+
+typedef struct Emulation_properties {
+	unsigned int sys_clk;
+	char program_name[MAX_PROG_NAME_SIZE];
+	char system_status = '\0';
+	union {
+		char current_cycle_status;
+		char current_cycle_inst_type;
+	};
+} Emulation_properties;
 
 #endif // !XMAKINA_EMULATOR_ENTITIES_H

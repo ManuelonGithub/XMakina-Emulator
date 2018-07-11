@@ -29,11 +29,11 @@ char debugger_main_menu()
 	while (1) {
 		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Main Menu ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
-		if (strlen(program_name) == 0) {
+		if (strlen(emulation.program_name) == 0) {
 			printf("No program loaded.\n\n");
 		}
 		else {
-			printf("%s program has been loaded.\n\n", program_name);
+			printf("%s program has been loaded.\n\n", emulation.program_name);
 		}
 
 		menu_option = 0;
@@ -51,7 +51,7 @@ char debugger_main_menu()
 			break;
 
 		case (RUN_PROGRAM):
-			if (strlen(program_name) == 0) {
+			if (strlen(emulation.program_name) == 0) {
 				printf("System hasn't loaded a program yet.\n");
 			}
 			else {
@@ -157,7 +157,7 @@ void reg_file_options()
 		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Register File ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 		for (i = 0; i < XMAKINA_CPU_REG_COUNT; i++) {
-			printf("R%d : 0x%04X\n", i, REG_CON_table[REG][i]);
+			printf("R%d : 0x%04X\n", i, reg_file.REG[i]);
 		}
 
 		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
@@ -205,7 +205,7 @@ void change_reg_content()
 			printf("Value is too large to be placed in a register.\n");
 		}
 		else {
-			REG_CON_table[REG][reg_num] = new_reg_value;
+			reg_file.REG[reg_num] = new_reg_value;
 		}
 	}
 	else {
@@ -400,7 +400,7 @@ void close_program()
 	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Close Program ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	char user_response;
-	printf("This option clears the contents in the memory (does not affect register contents).\n Are you sure you want to wish to close %s? (Y/N)\t", program_name);
+	printf("This option clears the contents in the memory (does not affect register contents).\n Are you sure you want to wish to close %s? (Y/N)\t", emulation.program_name);
 	scanf_s(" %c", &user_response, 1);
 	user_response = toupper(user_response);
 
@@ -409,7 +409,7 @@ void close_program()
 	case ('Y'):
 		printf("Closing program . . . . .  ");
 		memset(memory.byte, 0, sizeof(memory.byte));
-		program_name[0] = '\0';
+		emulation.program_name[0] = '\0';
 		printf("Program has been successfully closed.\n\n");
 		break;
 
@@ -425,10 +425,9 @@ void close_program()
 
 void test_inst_opcode()
 {
-	//printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Main Menu ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Instruction Opcode testing  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
-	char user_response, run_status, decoded_inst_type;
+	char user_response;
 	unsigned int inst;
 
 
@@ -445,24 +444,21 @@ void test_inst_opcode()
 		printf("\nPlease enter instruction opcode:\t");
 		scanf_s("%x", &inst);
 
-		/*********************** Mini CPU cycle ***********************/
+		/***************************************************** Mini CPU cycle *****************************************************/
 
-		IX = inst;
-		decoded_inst_type = decode();
+		inst_set.opcode = &sys_reg.IX.word;
+		sys_reg.IX.word = inst;
 
-		if (decoded_inst_type == INVALID_INST) {
-			printf("Invalid Instruction Opcode (= 0x%04X).\n\n", IX);
+		decode();
+		if (emulation.current_cycle_status == INVALID_INST) {
+			printf("Problem has occurred during the Decode process. Invalid data was fetched (= 0x%04X).\n", sys_reg.IX.word);
 			break;
 		}
 
-		run_status = execute(decoded_inst_type);
-
-		if (run_status == INVALID_INST) {
-			printf("Invalid Instruction Opcode (= 0x%04X).\n\n", IX);
+		execute();
+		if (emulation.current_cycle_status == INVALID_INST) {
+			printf("Invalid data has been attempted to be executed. Invalid data fetched = 0x%04X.\n", sys_reg.IX.word);
 		}
-
-		/*printf("\n");*/
-
 		break;
 
 	case ('N'):
@@ -474,3 +470,4 @@ void test_inst_opcode()
 		break;
 	}
 }
+

@@ -12,6 +12,7 @@
 #include "CPU_operations.h"
 #include "Bus_Devices_Interrupt_operations.h"
 
+XMakina_instruction_set inst_set;
 
 /* Notes on CPU Operation:
  * PROCESS_FAILURE/PROCESS_SUCCESS are general output flags used through the several steps of a CPU cycle.
@@ -23,30 +24,56 @@
  */
 
 
+char CPU_cycle()
+{
+	inst_set.opcode = &sys_reg.IX.word;
+
+	fetch();
+	if (emulation.current_cycle_status == PROCESS_FAILURE) {
+		printf("Problem has occurred during the Fetch process. Invalid value in PC (= 0x%04X).\n", reg_file.PC);
+		return emulation.current_cycle_status;
+	}
+
+	decode();
+	if (emulation.current_cycle_status == INVALID_INST) {
+		printf("Problem has occurred during the Decode process. Invalid data was fetched (= 0x%04X).\n", sys_reg.IX.word);
+		return emulation.current_cycle_status;
+	}
+
+	execute();
+	if (emulation.current_cycle_status == INVALID_INST) {
+		printf("Invalid data has been attempted to be executed. Invalid data fetched = 0x%04X.\n", sys_reg.IX.word);
+		return emulation.current_cycle_status;
+	}
+
+	return 0;
+}
+
 /* Fetch function:
  * Emulates part of the CPU cycle that fetches instruction data from memory (whose address is taken from the Program Counter)
  * And places the instruction word in the instruction register, to be decoded and then executed.
  */
-char fetch()
+void fetch()
 {
-	if (PC % 2 != 0) {					// Program counter should not have an odd value
-		if (PC == LAST_BYTE) {
+	if (reg_file.PC % 2 != 0) {					// Program counter should not have an odd value
+		if (reg_file.PC == LAST_BYTE) {
 			interrupt_return_process();	// This is the only exception to the rule
 		}
 		else {
-			return PROCESS_FAILURE;		// If the exception isn't met, the cycle is stopped and the user is notified of the error
+			emulation.current_cycle_status = PROCESS_FAILURE;	// If the exception isn't met, the cycle is stopped and the user is notified of the error
+			return;
 		}
 	}
 	else {
-		MAR = PC;
-		bus(MAR, &MBR, WORD, READ);
-		IX = MBR;
-		PC += PC_WORD_STEP;
+		sys_reg.MAR = reg_file.PC;
+		bus(sys_reg.MAR, &sys_reg.MBR, WORD, READ);
+		sys_reg.IX.word = sys_reg.MBR;
+		reg_file.PC += PC_WORD_STEP;
 	}
 
-	System_clk += NORMAL_OP_CLK_INC;
+	//emulation.sys_clk += NORMAL_OP_CLK_INC;
 
-	return PROCESS_SUCCESS;
+	emulation.current_cycle_status = PROCESS_SUCCESS;
 }
 
 
@@ -63,45 +90,43 @@ char fetch()
  * When naming the bits in the bit-format of each instruction type, 
  * "signature bit" is used when describing a bit that allows the process to easily distinguish between two instruction types contained in the same instruction category.
  */
-char decode()
+void decode()
 {
-	char category = INST_CATEGORY(IX);
-
-	switch (INST_CATEGORY(IX))
+	switch (sys_reg.IX.bits.category)
 	{
 	case (BRANCHING):
-		if (BRANCH_INST_TYPE_SIGNATURE(IX) == 0) {
-			return BRANCH_WITH_LINK_INST;
+		if (IX_BRANCH_SIG == 0) {
+			emulation.current_cycle_inst_type = BRANCH_WITH_LINK_INST;
 		}
 		else {
-			return CONDITIONAL_BRANCH_INST;
+			emulation.current_cycle_inst_type = CONDITIONAL_BRANCH_INST;
 		}
 		break;
 
 	case (ALU):
-		if (ALU_INST_TYPE_SIGNATURE(IX) == 0) {
-			return TWO_OPERAND_INST;
+		if (sys_reg.IX.bits.ALU_cat_sig_bit == 0) {
+			emulation.current_cycle_inst_type = TWO_OPERAND_INST;
 		}
 		else {
-			return SINGLE_REGISTER_INST;
+			emulation.current_cycle_inst_type = SINGLE_REGISTER_INST;
 		}
 		break;
 
 	case (MEM_ACCESS_AND_REG_INIT):
-		if (MEM_ACCESS_AND_REG_INIT_INST_TYPE(IX) < REG_INIT_INST_CODE_START) {
-			return DIRECT_MEMORY_ACCESS_INST;
+		if (IX_MEM_ACCESS_REG_INIT_INST_CODE < REG_INIT_INST_CODE_START) {
+			emulation.current_cycle_inst_type = DIRECT_MEMORY_ACCESS_INST;
 		}
 		else {
-			return REGISTER_INITIALIZATION_INST;
+			emulation.current_cycle_inst_type = REGISTER_INITIALIZATION_INST;
 		}
 		break;
 
 	case (MEM_ACCESS_REL):
-		return RELATIVE_MEMORY_ACCESS_INST;
+		emulation.current_cycle_inst_type = RELATIVE_MEMORY_ACCESS_INST;
 		break;
 
 	default:
-		return INVALID_INST;
+		emulation.current_cycle_inst_type = INVALID_INST;
 		break;
 	}
 }
@@ -110,54 +135,56 @@ char decode()
 /* Execute function:
  * Emulates part of the CPU cycle that executes the instruction decoded, 
  * using the operands laid out in the instruction word as described in the instruction type bit-format described in XMakina_Emulator_entities.h
- * Having sole Execution function allows the CPU cycle process to be laid out nicely, \
+ * Having sole Execution function allows the CPU cycle process to be laid out nicely,
  * with the "fetch -> decode -> execute" sequence being present the main (where the machine's cycle is performed).
  * The execution function also deals with filtering out any possible non-instruction data 
  * that might've slipped through the decoder, due to having a similar bit-format.
  */
-char execute(char instruction_type)
+void execute()
 {
-	switch (instruction_type)
+	switch (emulation.current_cycle_inst_type)
 	{
 	case (BRANCH_WITH_LINK_INST):
-		return BL(BRANCHING_OFFSET_WORD(instruction.subr_br.offset));
+		emulation.current_cycle_status = BL(BRANCHING_OFFSET_WORD(inst_set.br_link->offset));
 		break;
 
 	case (CONDITIONAL_BRANCH_INST):
-		return (*conditional_branching_execution[instruction.cond_br.inst_code]) (BRANCHING_OFFSET_WORD(instruction.cond_br.offset));
+		emulation.current_cycle_status = 
+			(*conditional_branching_execution[inst_set.cond_br->inst_code]) (BRANCHING_OFFSET_WORD(inst_set.cond_br->offset));
 		break;
 
 	case (TWO_OPERAND_INST):
 		printf("Executing a two-operand instruction.\n");
-		return INVALID_INST;
+		emulation.current_cycle_status = INVALID_INST;
 		break;
 
 	case (SINGLE_REGISTER_INST):
 		printf("Executing a single-register instruction.\n");
-		return INVALID_INST;
+		emulation.current_cycle_status = INVALID_INST;
 		break;
 																										// Register initialization instruction codes start go from 2 to 4,
 	case (REGISTER_INITIALIZATION_INST):																// so there needs to be a check if the code goes above (meaning invalid data slipped through the decoder)
-		if ((instruction.reg_init.inst_code - REG_INIT_INST_CODE_START) > REG_INIT_INST_CODE_START) {	// Inst_code gets subtracted by 2 to shift the code from 2...4, to 0...2,
-			return INVALID_INST;																		// which lets the function pointer array avoid having a complicated solution, 
+		if ((inst_set.reg_init->inst_code - REG_INIT_INST_CODE_START) > REG_INIT_INST_CODE_START) {		// Inst_code gets subtracted by 2 to shift the code from 2...4, to 0...2,
+			emulation.current_cycle_status = INVALID_INST;												// which lets the function pointer array avoid having a complicated solution, 
 		}																								// and allows the code to re-use an existing and fitting defined value (REG_INIT_INST_CODE_START)
 		else {																							
-			return (*register_initialization_execution[(instruction.reg_init.inst_code - REG_INIT_INST_CODE_START)]) (instruction.reg_init.destination_reg, instruction.reg_init.value);
+			emulation.current_cycle_status =
+				(*register_initialization_execution[(inst_set.reg_init->inst_code - REG_INIT_INST_CODE_START)]) (inst_set.reg_init->dst_reg, inst_set.reg_init->value);
 		}
 		break;
 
 	case (DIRECT_MEMORY_ACCESS_INST):
-		return (*direct_memory_access_execution[instruction.dir_mem_access.inst_code]) (instruction.dir_mem_access.action, 
-			instruction.dir_mem_access.word_byte_control, instruction.dir_mem_access.source, instruction.dir_mem_access.destination_reg);
+		emulation.current_cycle_status =
+			(*direct_memory_access_execution[inst_set.DMA->inst_code]) (inst_set.DMA->action, inst_set.DMA->W_B_ctrl, inst_set.DMA->source, inst_set.DMA->dst_reg);
 		break;
 
 	case (RELATIVE_MEMORY_ACCESS_INST):
 		printf("Executing a relative memory access instruction.\n");
-		return INVALID_INST;
+		emulation.current_cycle_status = INVALID_INST;
 		break;
 
 	default:
-		return INVALID_INST;
+		emulation.current_cycle_status = INVALID_INST;
 		break;
 	}
 }

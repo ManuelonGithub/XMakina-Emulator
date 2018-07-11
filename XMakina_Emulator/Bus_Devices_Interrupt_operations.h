@@ -5,14 +5,13 @@
 #ifndef BUS_DEVICE_INTERRUPTS_OPERATIONS_H
 #define BUS_DEVICE_INTERRUPTS_OPERATIONS_H
 
+#define DEVICE_MEMORY_SPACE 16
+
 enum BUS_CONTROLS { WORD = 0, BYTE = 1, READ = 0, WRITE = 1 };
 
-extern unsigned int System_clk;
-
-extern union XMakina_memory memory;
-extern unsigned short MAR;
-extern unsigned short MBR;
-extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
+extern XMakina_memory memory;
+extern System_registers sys_reg;
+extern Emulation_properties emulation;
 
 void device_management();
 void bus(unsigned short MAR, unsigned short * MBR, char word_byte_control, char read_write_control);

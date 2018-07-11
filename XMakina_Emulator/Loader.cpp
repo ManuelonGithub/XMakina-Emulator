@@ -19,7 +19,7 @@
  */
 void loader()
 {
-	printf("\n~=~=~=~=~=~=~=~=~=~=~=~=~ Loader ~=~=~=~=~=~=~=~=~=~=~=~=~=~\n\n");
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Loader  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	char filename[100];
 
@@ -87,7 +87,7 @@ int s_record_decoder(char * s_record)
 	{
 	case ('9'):
 		memory.word[LAST_WORD] = loaded_address;	// Program counter starting address is stored in PC word of Vector 15 (Reset Vector)
-		PC = loaded_address;
+		reg_file.PC = loaded_address;
 		break;
 
 	case ('1'):
@@ -100,7 +100,7 @@ int s_record_decoder(char * s_record)
 
 	case ('0'):
 		for (i = DATA_POS; i < (DATA_POS + hex_pair_count - 3); i++) {	// This reads the characters pertaining to the program name
-			program_name[loaded_address++] = s_record[i];
+			emulation.program_name[loaded_address++] = s_record[i];
 		}
 		checksum = ~validation_sum & LOW_BYTE_MASK;
 		break;

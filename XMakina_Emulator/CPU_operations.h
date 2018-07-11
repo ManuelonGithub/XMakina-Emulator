@@ -19,46 +19,65 @@
 
 #define INST_CATEGORY(INST) ((INST & 0xC000) >> 14)
 
-#define BRANCH_INST_TYPE_SIGNATURE(INST) ((INST & 0x2000) >> 13)
-#define BRANCHING_INST_CODE(INST) ((INST & 0x1C00) >> 10)
-#define BRANCHING_OFFSET_WORD(OFFSET) ((OFFSET << 1))
-#define ALU_INST_TYPE_SIGNATURE(INST) ((INST & 0x100) >> 8)
-#define ALU_INST_CODE(INST) ((INST & 0x1E00) >> 0)
-#define MEM_ACCESS_AND_REG_INIT_INST_TYPE(INST) ((INST & 0x3800) >> 11)
+#define IX_BRANCH_SIG (sys_reg.IX.bits.multi_purporse >> 2)
+#define IX_MEM_ACCESS_REG_INIT_INST_CODE sys_reg.IX.bits.multi_purporse
 #define REG_INIT_INST_CODE_START 2
-#define RELATIVE_MEMORY_ACCESS_INST_TYPE(INST) ((INST & 0x2000) >> 13)
 
-enum INST_CATEGORY {BRANCHING, ALU, MEM_ACCESS_AND_REG_INIT, MEM_ACCESS_REL};
-enum INST_TYPES { INVALID_INST = -1, BRANCH_WITH_LINK_INST, CONDITIONAL_BRANCH_INST, TWO_OPERAND_INST, 
-					SINGLE_REGISTER_INST, DIRECT_MEMORY_ACCESS_INST, REGISTER_INITIALIZATION_INST, RELATIVE_MEMORY_ACCESS_INST};
+#define BRANCHING_OFFSET_WORD(OFFSET) ((OFFSET << 1))
 
-extern unsigned int System_clk;
-
-extern union XMakina_memory memory;
-extern unsigned short MAR;
-extern unsigned short MBR;
-extern union XMakina_instruction_set instruction;
-extern unsigned short REG_CON_table[REG_OR_CON][XMAKINA_CPU_REG_COUNT];
-
-union XMakina_instruction_set {
-	unsigned short opcode;
-	struct branch_with_link_instruction subr_br;
-	struct conditional_branch_instruction cond_br;
-	struct two_operand_instruction two_operand;
-	struct single_register_instruction single_reg;
-	struct direct_memory_access_instruction dir_mem_access;
-	struct register_initialization_instruction reg_init;
-	struct relative_memory_access_instruction rel_mem_access;
+enum INST_CATEGORY { BRANCHING, ALU, MEM_ACCESS_AND_REG_INIT, MEM_ACCESS_REL };
+enum INST_TYPES { 
+	INVALID_INST = -1, BRANCH_WITH_LINK_INST, CONDITIONAL_BRANCH_INST, 
+	TWO_OPERAND_INST, SINGLE_REGISTER_INST, DIRECT_MEMORY_ACCESS_INST, 
+	REGISTER_INITIALIZATION_INST, RELATIVE_MEMORY_ACCESS_INST
 };
+
+extern XMakina_memory memory;
+extern XMakina_register_file reg_file;
+extern System_registers sys_reg;
+extern Emulation_properties emulation;
+
+/* XMakina_instruction_set pointer union:
+ *		- This union minimizes the  necessary bitwise operations during the execute process.
+ *		- By containing the bit-formats of the whole XMakina ISA, 
+ *		- The system is able to gather all the necessary information with simple conditional logic.
+ *		- Union elements:
+ *			- "opcode": pointer used to link to the whole instruction word to this union;
+ *			- "br_link': Branching with Link instruction type bit format structure. 
+ *				Definition found in Branching_instructions.h .
+ *			- "cond_br": Conditional Branching instruction type bit format structure.
+ *				Definition found in Branching_instructions.h .
+ *			- "two_op": Two-Operand instruction type bit format structure. 
+ *				Definition found in Two_Operand_instructions.h .
+ *			- "single-reg": Single Register instruction type bit format structure. 
+ *				Definition found in Memory_access_instructions.h .
+ *			- "DMA": Direct Memory Access instruction type bit format structure. 
+ *				Definition found in Single_Register_manipulation_and_initialization_instructions.h .
+ *			- "reg_init": Register Initialization instruction type bit format structure.
+ *				Definition found in Single_Register_manipulation_and_initialization_instructions.h .
+ *			- "RMA": Relative Memory Access instruction type bit format structure.
+ *				Definition found in Memory_access_instructions.h .
+ */
+typedef union XMakina_instruction_set {
+	unsigned short * opcode;
+	branch_with_link_instruction * br_link;
+	conditional_branch_instruction * cond_br;
+	two_operand_instruction * two_op;
+	single_register_instruction * single_reg;
+	direct_memory_access_instruction * DMA;
+	register_initialization_instruction * reg_init;
+	relative_memory_access_instruction * RMA;
+} XMakina_instruction_set;
 
 extern char (*conditional_branching_execution[]) (signed short);
 extern char (*register_initialization_execution[]) (char, unsigned short);
 extern char (*direct_memory_access_execution[]) (char, char, char, char);
 extern char (*relative_memory_access_execution[]) (signed short, char, char, char);
 
-char fetch();
-char decode();
-char execute(char instruction_type);
+char CPU_cycle();
+void fetch();
+void decode();
+void execute();
 
 void debugger_tiggers();
 
