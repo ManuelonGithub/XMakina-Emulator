@@ -156,6 +156,7 @@
     <ClInclude Include="Single_Register_manipulation_and_initialization_instructions.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Two_Operand_instructions.h" />
     <ClInclude Include="XMakina_Emulator_entities.h" />
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +173,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Two_Operand_instructions.cpp" />
     <ClCompile Include="XMakina_Emulator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +181,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Reg_ini_and_direct_memory_access_test.xme" />
+    <None Include="Test Files\All_XMakina_Inst.asm" />
+    <None Include="Test Files\All_XMakina_Inst.lis" />
+    <None Include="Test Files\All_XMakina_Inst.xme" />
+    <None Include="Test Files\XMakina_branching\XMakina_branching.asm" />
+    <None Include="Test Files\XMakina_branching\XMakina_branching.lis" />
+    <None Include="Test Files\XMakina_branching\XMakina_branching.xme" />
+    <None Include="Test Files\XMakina_dir_mem_access\XMakina_dir_mem_access.asm" />
+    <None Include="Test Files\XMakina_dir_mem_access\XMakina_dir_mem_access.lis" />
+    <None Include="Test Files\XMakina_dir_mem_access\XMakina_dir_mem_access.xme" />
+    <None Include="Test Files\XMakina_reg_init_inst\XMakina_reg_init_inst.asm" />
+    <None Include="Test Files\XMakina_reg_init_inst\XMakina_reg_init_inst.lis" />
+    <None Include="Test Files\XMakina_reg_init_inst\XMakina_reg_init_inst.xme" />
     <None Include="whole_ISA_test.xme" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

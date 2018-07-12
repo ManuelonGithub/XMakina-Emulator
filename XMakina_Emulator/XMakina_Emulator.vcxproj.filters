@@ -45,6 +45,9 @@
     <ClInclude Include="Bus_Devices_Interrupt_operations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Two_Operand_instructions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -74,6 +77,9 @@
     <ClCompile Include="Bus_and_Device_operations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Two_Operand_instructions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="S_Record_test.txt">
@@ -85,6 +91,42 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Reg_ini_and_direct_memory_access_test.xme">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\All_XMakina_Inst.asm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\All_XMakina_Inst.lis">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\All_XMakina_Inst.xme">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_branching\XMakina_branching.asm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_branching\XMakina_branching.lis">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_branching\XMakina_branching.xme">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_dir_mem_access\XMakina_dir_mem_access.asm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_dir_mem_access\XMakina_dir_mem_access.lis">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_dir_mem_access\XMakina_dir_mem_access.xme">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_reg_init_inst\XMakina_reg_init_inst.asm">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_reg_init_inst\XMakina_reg_init_inst.lis">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Test Files\XMakina_reg_init_inst\XMakina_reg_init_inst.xme">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

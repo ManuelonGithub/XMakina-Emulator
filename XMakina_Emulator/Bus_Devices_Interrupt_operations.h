@@ -7,7 +7,7 @@
 
 #define DEVICE_MEMORY_SPACE 16
 
-enum BUS_CONTROLS { WORD = 0, BYTE = 1, READ = 0, WRITE = 1 };
+enum BUS_CONTROLS { READ = 0, WRITE = 1 };
 
 extern XMakina_memory memory;
 extern System_registers sys_reg;

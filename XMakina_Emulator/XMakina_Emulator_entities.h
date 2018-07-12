@@ -19,6 +19,9 @@
 #define HIGH_BYTE_OVERWRITE(dst, value) ((dst & LOW_BYTE_MASK) | (value & HIGH_BYTE_MASK))
 #define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
 #define BIT_CHECK(src, bit) ((src >> bit) & 1)
+#define LSBi(value) (value & 0x1)
+#define WORD_MSBi(word) (word & 0x8000)
+#define BYTE_MSBi(byte) (byte & 0x80)
 
 #define MAX_PROG_NAME_SIZE 30
 
@@ -37,6 +40,7 @@
 #define MEMORY_ACCESS_CLK_INC 3
 #define NORMAL_OP_CLK_INC 1
 
+enum OPERATION_SIZE { WORD, BYTE };
 enum PROCESS_FLAGS { PROCESS_FAILURE, PROCESS_SUCCESS };
 enum BIT_MANIP { CLEAR, SET };
 
@@ -66,33 +70,6 @@ typedef union XMakina_memory {
 	Device_port dev_port[DEVICE_NUMBER_SUPPORTED];
 } XMakina_memory;
 
-
-/* Two-operand intruction:
-*		- "Destination Register": 3 bits used to determine the destination register used in the execution.
-*		- "source": 3 bits used to determine the source used in the execution. 
-*			A two-operand source can either be a register or a value from the constant value table
-*		- "Word-Byte control": Signals the process to either address the whole word of the operands, or just the Low Byte
-*		- "Register-Constant control": Unique to two-operand. 
-*			Signals the process to either use the register file or the constant value table for the source value.
-*		- "Instruction Category signature": Bit that allows the decoding circuitry to 
-*			distinguish between instruction types that share the same instruction category.
-*		- "Intruction code": Bit(s) that allows the decode/execution circuitry
-*			to distinguish between instructions within the same instrucition type
-*		- Instruction category: The two MSBi's of the instruction opcode.
-*			Instructions within the same category don't necessarely share anything in common,
-*			it's just a way to efficiently decode the instruction opcode.
-*/
-typedef struct two_operand_instruction {
-	unsigned short dst_reg : 3;
-	unsigned short source : 3;
-	unsigned short W_B_ctrl : 1;
-	unsigned short REG_CON_ctrl : 1;
-	unsigned short inst_type_signature : 1;
-	unsigned short inst_code : 4;
-	unsigned short unused_bits : 1;			// Bit(s) that aren't used to describe any relevant information in the instruction opcode
-	unsigned short inst_category : 2;
-} two_operand_instruction;
-
 typedef union PSW_reg_format {
 	unsigned short word;
 	struct {
@@ -106,7 +83,7 @@ typedef union PSW_reg_format {
 	};
 } PSW_reg_format;
 
-typedef union reg {
+typedef union register_format {
 	unsigned short word;
 	struct {
 		unsigned char LSB;
@@ -116,11 +93,11 @@ typedef union reg {
 
 typedef union XMakina_register_file {
 	struct {
-		reg R0, R1, R2, R3, LR, SP;
+		register_format R0, R1, R2, R3, LR, SP;
 		PSW_reg_format PSW;
-		reg PC;
+		register_format PC;
 	};
-	reg REG [XMAKINA_CPU_REG_COUNT];
+	register_format REG [XMAKINA_CPU_REG_COUNT];
 } XMakina_register_file;
 
 typedef union IX_bit_format {

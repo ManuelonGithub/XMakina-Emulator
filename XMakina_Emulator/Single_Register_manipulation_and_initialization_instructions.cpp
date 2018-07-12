@@ -4,6 +4,7 @@
 #include "Bus_Devices_Interrupt_operations.h"
 
 char (*register_initialization_execution[]) (char, unsigned short) = { MOVL, MOVLZ, MOVH };
+char(*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
 
 /*********************** Register Initialization **********************/
 char MOVL(char dst_reg, unsigned short value)
@@ -34,7 +35,9 @@ char MOVH(char dst_reg, unsigned short value)
 /*********************** Single Register Manipulation *****************/
 char SRA(char word_byte_control, char dst_reg)
 {
-	reg_file.PSW.C = WORD_LSBi(reg_file.REG[dst_reg].LSB);
+	printf("Executing a SRA instruction.\n");
+
+	reg_file.PSW.C = LSBi(reg_file.REG[dst_reg].LSB);
 
 	if (word_byte_control == WORD) {
 		reg_file.REG[dst_reg].word >>= 1;
@@ -48,7 +51,9 @@ char SRA(char word_byte_control, char dst_reg)
 
 char RRC(char word_byte_control, char dst_reg)
 {
-	reg_file.PSW.unused_bits = WORD_LSBi(reg_file.REG[dst_reg].LSB);	// Using the unused space in the PSW to temporarely store the value of the LSBi, 
+	printf("Executing a RRC instruction.\n");
+
+	reg_file.PSW.unused_bits = LSBi(reg_file.REG[dst_reg].LSB);	// Using the unused space in the PSW to temporarely store the value of the LSBi, 
 																		// so it doesn't get lost during the bit rotation.
 	if (word_byte_control == WORD) {
 		reg_file.REG[dst_reg].word >>= 1;
@@ -64,16 +69,34 @@ char RRC(char word_byte_control, char dst_reg)
 	return PROCESS_SUCCESS;
 }
 
-char SWPB(char word_byte_control, char dst_reg)		// This code might be a bit ugly, but it's an interesting process that allows values to be swapped without needing a temporary value holder.
+char SWPB(char word_byte_control, char dst_reg)
 {
-	//unsigned short temp = reg_file.REG[dst_reg];
+	printf("Executing a SWPB instruction.\n");
 
+	unsigned short temp = reg_file.REG[dst_reg].MSB;
+
+	reg_file.REG[dst_reg].MSB = reg_file.REG[dst_reg].LSB;
+	reg_file.REG[dst_reg].LSB = temp;
+	
 	return PROCESS_SUCCESS;
 }
 
+//char SWPB(char word_byte_control, char dst_reg)					// Using XOR swapping algorithm. 
+//{																	// Doesn't use temporary registers. 
+//	if (reg_file.REG[dst_reg].MSB != reg_file.REG[dst_reg].LSB) {	// Could be benificial to XMakina, were the # of registers is limited.
+//		reg_file.REG[dst_reg].MSB ^= reg_file.REG[dst_reg].LSB;
+//		reg_file.REG[dst_reg].LSB ^= reg_file.REG[dst_reg].MSB;
+//		reg_file.REG[dst_reg].MSB ^= reg_file.REG[dst_reg].LSB;
+//	}
+//
+//	return PROCESS_SUCCESS;
+//}
+
 char SXT(char word_byte_control, char dst_reg)
 {
+	printf("Executing a SXT instruction.\n");
 
+	reg_file.REG[dst_reg].MSB = BYTE_MSBi(reg_file.REG[dst_reg].LSB);
 
 	return PROCESS_SUCCESS;
 }

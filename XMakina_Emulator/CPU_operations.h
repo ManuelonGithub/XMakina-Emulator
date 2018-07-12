@@ -22,6 +22,7 @@
 #define IX_BRANCH_SIG (sys_reg.IX.bits.multi_purporse >> 2)
 #define IX_MEM_ACCESS_REG_INIT_INST_CODE sys_reg.IX.bits.multi_purporse
 #define REG_INIT_INST_CODE_START 2
+#define SINGLE_REG_INST_CODE_LIMIT 4
 
 #define BRANCHING_OFFSET_WORD(OFFSET) ((OFFSET << 1))
 
@@ -73,6 +74,7 @@ extern char (*conditional_branching_execution[]) (signed short);
 extern char (*register_initialization_execution[]) (char, unsigned short);
 extern char (*direct_memory_access_execution[]) (char, char, char, char);
 extern char (*relative_memory_access_execution[]) (signed short, char, char, char);
+extern char (*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
 
 char CPU_cycle();
 void fetch();

@@ -1,0 +1,40 @@
+X-Makina Assembler - Version 1.14 (3 June 2018)
+.ASM file: XMakina_reg_init_inst.asm
+
+  1	    	     		ORG	#$100
+  2	    	     		
+  3	    	     	MAINLINE
+  4	    	     		
+  5	0100	91A0		MOVL	#$34,R0
+  6	0102	A090		MOVH	#$1234,R0
+  7	    	     	
+  8	0104	A559		MOVH	#$ABCD,R1
+  9	0106	9669		MOVL	#$CD,R1
+ 10	    	     	
+ 11	0108	98B1		MOVLZ	#22,R1
+ 12	    	     	
+ 13	010A	A7FA		MOVH	#$FF78,R2
+ 14	010C	93C2		MOVL	#$78,R2
+ 15	    	     	
+ 16	010E	9A0B		MOVLZ	#'A',R3
+ 17	    	     	
+ 18	0110	90D4		MOVL	#$1a,R4
+ 19	0112	A094		MOVH	#$1234,R4
+ 20	    	     		
+ 21	    	     		END MAINLINE
+Successful completion of assembly
+
+** Symbol table **
+Name                               Type		Value	Decimal
+MAINLINE                           LBL		0100	256
+R7                                 REG		0007	7
+R6                                 REG		0006	6
+R5                                 REG		0005	5
+R4                                 REG		0004	4
+R3                                 REG		0003	3
+R2                                 REG		0002	2
+R1                                 REG		0001	1
+R0                                 REG		0000	0
+
+.XME file: C:\Users\Manuel\Documents\3rd year Summer term files\Computer Architecture\X-Makina Assembler\XMakina_reg_init_inst.xme
+

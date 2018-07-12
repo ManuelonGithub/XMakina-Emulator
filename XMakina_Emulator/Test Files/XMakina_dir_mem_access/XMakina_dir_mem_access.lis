@@ -1,0 +1,49 @@
+X-Makina Assembler - Version 1.14 (3 June 2018)
+.ASM file: XMakina_dir_mem_access.asm
+
+  1	    	     		ORG	#$100
+  2	    	     		
+  3	    	     	MAINLINE
+  4	    	     		
+  5	0100	8011		LD	R1,R2
+  6	0102	805A		LD.B	R2,R3
+  7	0104	880A		ST	R1,R2
+  8	0106	8853		ST.B	R2,R3
+  9	    	     	;
+ 10	0108	8111		LD	R1+,R2
+ 11	010A	8211		LD	R1-,R2
+ 12	010C	8511		LD	+R1,R2
+ 13	010E	8611		LD	-R1,R2
+ 14	    	     	;
+ 15	0110	8151		LD.B	R1+,R2
+ 16	0112	8251		LD.B	R1-,R2
+ 17	0114	8551		LD.B	+R1,R2
+ 18	0116	8651		LD.B	-R1,R2
+ 19	    	     	;
+ 20	0118	890A		ST	R1,R2+
+ 21	011A	8A0A		ST	R1,R2-
+ 22	011C	8D0A		ST	R1,+R2
+ 23	011E	8E0A		ST	R1,-R2
+ 24	    	     	;
+ 25	0120	894A		ST.B	R1,R2+
+ 26	0122	8A4A		ST.B	R1,R2-
+ 27	0124	8D4A		ST.B	R1,+R2
+ 28	0126	8E4A		ST.B	R1,-R2
+ 29	    	     		
+ 30	    	     		END MAINLINE
+Successful completion of assembly
+
+** Symbol table **
+Name                               Type		Value	Decimal
+MAINLINE                           LBL		0100	256
+R7                                 REG		0007	7
+R6                                 REG		0006	6
+R5                                 REG		0005	5
+R4                                 REG		0004	4
+R3                                 REG		0003	3
+R2                                 REG		0002	2
+R1                                 REG		0001	1
+R0                                 REG		0000	0
+
+.XME file: C:\Users\Manuel\Documents\3rd year Summer term files\Computer Architecture\X-Makina Assembler\XMakina_dir_mem_access.xme
+

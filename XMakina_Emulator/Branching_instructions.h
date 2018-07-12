@@ -8,7 +8,6 @@
 
 extern XMakina_register_file reg_file;
 
-
 /* Branching with Link intruction:
 *		- Offset holds the "word-jump" added to the PC counter.
 *		- "Instruction Category signature": Bit that allows the decoding circuitry to distinguish
@@ -22,7 +21,6 @@ typedef struct branch_with_link_instruction {
 	unsigned short inst_type_signature : 1;
 	unsigned short inst_category : 2;
 } branch_with_link_instruction;
-
 
 /* Conditional Branching intruction:
 *		- Offset holds the "word-jump" added to the PC counter.

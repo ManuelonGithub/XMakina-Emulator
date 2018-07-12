@@ -159,8 +159,14 @@ void execute()
 		break;
 
 	case (SINGLE_REGISTER_INST):
-		printf("Executing a single-register instruction.\n");
-		emulation.current_cycle_status = INVALID_INST;
+		if (inst_set.single_reg->inst_code < SINGLE_REG_INST_CODE_LIMIT) {
+			emulation.current_cycle_status =
+				(*single_register_execution[inst_set.single_reg->inst_code]) (inst_set.single_reg->W_B_ctrl, inst_set.single_reg->dst_reg);
+		}
+		else{
+			emulation.current_cycle_status = INVALID_INST;
+		}
+		
 		break;
 																										// Register initialization instruction codes start go from 2 to 4,
 	case (REGISTER_INITIALIZATION_INST):																// so there needs to be a check if the code goes above (meaning invalid data slipped through the decoder)

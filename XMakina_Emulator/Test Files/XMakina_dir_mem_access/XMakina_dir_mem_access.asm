@@ -1,0 +1,30 @@
+	ORG	#$100
+	
+MAINLINE
+	
+	LD	R1,R2
+	LD.B	R2,R3
+	ST	R1,R2
+	ST.B	R2,R3
+;
+	LD	R1+,R2
+	LD	R1-,R2
+	LD	+R1,R2
+	LD	-R1,R2
+;
+	LD.B	R1+,R2
+	LD.B	R1-,R2
+	LD.B	+R1,R2
+	LD.B	-R1,R2
+;
+	ST	R1,R2+
+	ST	R1,R2-
+	ST	R1,+R2
+	ST	R1,-R2
+;
+	ST.B	R1,R2+
+	ST.B	R1,R2-
+	ST.B	R1,+R2
+	ST.B	R1,-R2
+	
+	END MAINLINE

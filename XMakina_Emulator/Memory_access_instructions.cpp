@@ -55,7 +55,6 @@ char LD(char action, char word_byte_control, char src_reg, char dst_reg)
 }
 
 
-/************************ Relative Memory Accessing *******************/
 char ST(char action, char word_byte_control, char src_reg, char dst_reg)
 {
 	printf("Executing a ST instruction.\n");
@@ -97,12 +96,14 @@ char ST(char action, char word_byte_control, char src_reg, char dst_reg)
 	return PROCESS_SUCCESS;
 }
 
+
+/************************ Relative Memory Accessing *******************/
 char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
 {
 	printf("Executing a LDR instruction.\n");
+
 	sys_reg.MAR = (reg_file.REG[src_reg].word + offset);
 	bus(sys_reg.MAR, &sys_reg.MBR, word_byte_control, READ);
-	//reg_file.REG[dst_reg] = (word_byte_control == WORD) ? sys_reg.MBR : LOW_BYTE_OVERWRITE(reg_file.REG[dst_reg], sys_reg.MBR);
 
 	if (word_byte_control == WORD) {
 		reg_file.REG[dst_reg].word = sys_reg.MBR;
@@ -117,6 +118,7 @@ char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg
 char STR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
 {
 	printf("Executing a STR instruction.\n");
+
 	sys_reg.MAR = (reg_file.REG[dst_reg].word + offset);
 	sys_reg.MBR = reg_file.REG[src_reg].word;
 	bus(sys_reg.MAR, &sys_reg.MBR, word_byte_control, WRITE);

@@ -1,0 +1,140 @@
+X-Makina Assembler - Version 1.14 (3 June 2018)
+.ASM file: All_XMakina_Inst.asm
+
+  1	    	     	;
+  2	    	     	; Assemble all instructions
+  3	    	     	; Check codes
+  4	    	     	;
+  5	0000	8011		LD	R1,R2
+  6	0002	805A		LD.B	R2,R3
+  7	0004	880A		ST	R1,R2
+  8	0006	8853		ST.B	R2,R3
+  9	    	     	;
+ 10	0008	8111		LD	R1+,R2
+ 11	000A	8211		LD	R1-,R2
+ 12	000C	8511		LD	+R1,R2
+ 13	000E	8611		LD	-R1,R2
+ 14	    	     	;
+ 15	0010	8151		LD.B	R1+,R2
+ 16	0012	8251		LD.B	R1-,R2
+ 17	0014	8551		LD.B	+R1,R2
+ 18	0016	8651		LD.B	-R1,R2
+ 19	    	     	;
+ 20	0018	890A		ST	R1,R2+
+ 21	001A	8A0A		ST	R1,R2-
+ 22	001C	8D0A		ST	R1,+R2
+ 23	001E	8E0A		ST	R1,-R2
+ 24	    	     	;
+ 25	0020	894A		ST.B	R1,R2+
+ 26	0022	8A4A		ST.B	R1,R2-
+ 27	0024	8D4A		ST.B	R1,+R2
+ 28	0026	8E4A		ST.B	R1,-R2
+ 29	    	     	;
+ 30	    	     	;	LDR	R1,#-500,R2	; Invalid relative value
+ 31	0028	C293		LDR	R2,#$5,R3
+ 32	002A	C2D3		LDR.B	R2,#$5,R3
+ 33	002C	F893		STR	R2,R3,#-15
+ 34	002E	E2D3		STR.B	R2,R3,#$5
+ 35	    	     	;
+ 36	0030	90D3		MOVL	#$1a,R3
+ 37	0032	9A0B		MOVLZ	#'A',R3
+ 38	0034	A093		MOVH	#$1234,R3
+ 39	    	     	; Branching
+ 40	    	     		ORG	#$100
+ 41	    	     	LOOP
+ 42	0100	1FFF		BL	LOOP
+ 43	0102	27FE		BNE	LOOP
+ 44	0104	27FD		BNZ	LOOP
+ 45	0106	23FC		BEQ	LOOP
+ 46	0108	23FB		BZ	LOOP
+ 47	010A	2FFA		BNC	LOOP
+ 48	010C	2FF9		BLO	LOOP
+ 49	010E	2BF8		BC	LOOP
+ 50	0110	2BF7		BHS	LOOP
+ 51	0112	33F6		BN	LOOP
+ 52	0114	37F5		BGE	LOOP
+ 53	0116	3BF4		BLT	LOOP
+ 54	0118	3FF3		BAL	LOOP
+ 55	    	     	; Register-register
+ 56	011A	600A		ADD	R1,R2
+ 57	011C	6053		ADD.B	R2,R3
+ 58	011E	6213		ADDC	R2,R3	; ADD with Carry
+ 59	0120	6253		ADDC.B	R2,R3
+ 60	0122	6413		SUB	R2,R3
+ 61	0124	6453		SUB.B	R2,R3
+ 62	0126	6613		SUBC	R2,R3
+ 63	0128	6653		SUBC.B	R2,R3
+ 64	    	     	; Note - the ADDC mnemonic has changed
+ 65	    	     	; This might require changes to the pre-assembler's 
+ 66	012A	680A		DADD	R1,R2	; BCD arithmetic
+ 67	012C	6853		DADD.B	R2,R3	; BCD arithmetic
+ 68	    	     	;
+ 69	012E	6A13		CMP	R2,R3
+ 70	0130	6A53		CMP.B	R2,R3
+ 71	0132	6C13		XOR	R2,R3
+ 72	0134	6C53		XOR.B	R2,R3
+ 73	0136	6E13		AND	R2,R3
+ 74	0138	6E53		AND.B	R2,R3
+ 75	013A	7013		BIT	R2,R3
+ 76	013C	7053		BIT.B	R2,R3
+ 77	013E	7213		BIC	R2,R3
+ 78	0140	7253		BIC.B	R2,R3
+ 79	0142	7413		BIS	R2,R3
+ 80	0144	7453		BIS.B	R2,R3
+ 81	0146	7613		MOV	R2,R3
+ 82	0148	7653		MOV.B	R2,R3
+ 83	    	     	; Constant-register
+ 84	014A	608A		ADD	#$1,R2
+ 85	014C	60CB		ADD.B	#$1,R3
+ 86	014E	628B		ADDC	#$1,R3
+ 87	0150	62CB		ADDC.B	#$1,R3
+ 88	0152	648B		SUB	#$1,R3
+ 89	0154	64CB		SUB.B	#$1,R3
+ 90	0156	668B		SUBC	#$1,R3
+ 91	0158	66CB		SUBC.B	#$1,R3
+ 92	    	     	;
+ 93	015A	688A		DADD	#$1,R2	; BCD
+ 94	015C	68CB		DADD.B	#$1,R3	; BCD
+ 95	    	     	;
+ 96	015E	6A8B		CMP	#$1,R3
+ 97	0160	6ACB		CMP.B	#$1,R3
+ 98	0162	6C8B		XOR	#$1,R3
+ 99	0164	6CCB		XOR.B	#$1,R3
+100	0166	6E8B		AND	#$1,R3
+101	0168	6ECB		AND.B	#$1,R3
+102	016A	708B		BIT	#$1,R3
+103	016C	70CB		BIT.B	#$1,R3
+104	016E	728B		BIC	#$1,R3
+105	0170	72CB		BIC.B	#$1,R3
+106	0172	748B		BIS	#$1,R3
+107	0174	74CB		BIS.B	#$1,R3
+108	0176	768B		MOV	#$1,R3
+109	0178	76CB		MOV.B	#$1,R3
+110	    	     	;
+111	017A	780A		SWAP	R1,R2
+112	    	     	;
+113	017C	7103		SRA	R3
+114	017E	7142		SRA.B	R2
+115	0180	7303		RRC	R3
+116	0182	7342		RRC.B	R2
+117	0184	7502		SWPB	R2
+118	0186	7702		SXT	R2
+119	    	     	;
+120	    	     		END	LOOP
+
+Successful completion of assembly
+
+** Symbol table **
+Name                               Type		Value	Decimal
+LOOP                               LBL		0100	256
+R7                                 REG		0007	7
+R6                                 REG		0006	6
+R5                                 REG		0005	5
+R4                                 REG		0004	4
+R3                                 REG		0003	3
+R2                                 REG		0002	2
+R1                                 REG		0001	1
+R0                                 REG		0000	0
+
+.XME file: C:\Users\Manuel\Documents\3rd year Summer term files\Computer Architecture\X-Makina Assembler\All_XMakina_Inst.xme
+

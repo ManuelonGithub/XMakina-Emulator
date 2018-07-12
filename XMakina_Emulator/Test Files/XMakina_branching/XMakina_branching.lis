@@ -1,0 +1,45 @@
+X-Makina Assembler - Version 1.14 (3 June 2018)
+.ASM file: XMakina_branching.asm
+
+  1	    	     	; Branching
+  2	    	     		ORG	#$100
+  3	    	     	MAINLINE
+  4	0100	00FF		BL	LOOP
+  5	0102	24FE		BNE	LOOP
+  6	0104	24FD		BNZ	LOOP
+  7	0106	20FC		BEQ	LOOP
+  8	0108	20FB		BZ	LOOP
+  9	010A	2CFA		BNC	LOOP
+ 10	010C	2CF9		BLO	LOOP
+ 11	010E	28F8		BC	LOOP
+ 12	0110	28F7		BHS	LOOP
+ 13	0112	30F6		BN	LOOP
+ 14	0114	34F5		BGE	LOOP
+ 15	0116	38F4		BLT	LOOP
+ 16	0118	3CF3		BAL	LOOP
+ 17	    	     		
+ 18	    	     		ORG #$300
+ 19	    	     	LOOP
+ 20	0300	90D3		MOVL	#$1a,R3
+ 21	0302	9A0B		MOVLZ	#'A',R3
+ 22	0304	A093		MOVH	#$1234,R3
+ 23	0306	3EFC		BAL MAINLINE
+ 24	    	     		
+ 25	    	     		END MAINLINE
+Successful completion of assembly
+
+** Symbol table **
+Name                               Type		Value	Decimal
+LOOP                               LBL		0300	768
+MAINLINE                           LBL		0100	256
+R7                                 REG		0007	7
+R6                                 REG		0006	6
+R5                                 REG		0005	5
+R4                                 REG		0004	4
+R3                                 REG		0003	3
+R2                                 REG		0002	2
+R1                                 REG		0001	1
+R0                                 REG		0000	0
+
+.XME file: C:\Users\Manuel\Documents\3rd year Summer term files\Computer Architecture\X-Makina Assembler\XMakina_branching.xme
+
