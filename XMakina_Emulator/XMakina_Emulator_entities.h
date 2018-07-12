@@ -20,8 +20,8 @@
 #define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
 #define BIT_CHECK(src, bit) ((src >> bit) & 1)
 #define LSBi(value) (value & 0x1)
-#define WORD_MSBi(word) (word & 0x8000)
-#define BYTE_MSBi(byte) (byte & 0x80)
+#define WORD_MSBi_value(word) (word & 0x8000)
+#define BYTE_MSBi_value(byte) (byte & 0x80)
 
 #define MAX_PROG_NAME_SIZE 30
 
@@ -89,7 +89,7 @@ typedef union register_format {
 		unsigned char LSB;
 		unsigned char MSB;
 	};
-} reg;
+} register_format;
 
 typedef union XMakina_register_file {
 	struct {

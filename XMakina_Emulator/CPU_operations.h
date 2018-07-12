@@ -12,6 +12,7 @@
 #include "Branching_instructions.h"
 #include "Single_Register_manipulation_and_initialization_instructions.h"
 #include "Memory_access_instructions.h"
+#include "Two_Operand_instructions.h"
 
 #pragma once
 #ifndef CPU_OPERATIONS_H
@@ -74,7 +75,7 @@ extern char (*conditional_branching_execution[]) (signed short);
 extern char (*register_initialization_execution[]) (char, unsigned short);
 extern char (*direct_memory_access_execution[]) (char, char, char, char);
 extern char (*relative_memory_access_execution[]) (signed short, char, char, char);
-extern char (*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
+extern char (*single_register_execution[]) (char, char);
 
 char CPU_cycle();
 void fetch();

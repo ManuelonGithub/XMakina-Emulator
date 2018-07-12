@@ -1,4 +1,5 @@
 
+#include "stdafx.h"
 #include "Two_Operand_instructions.h"
 
 signed short Const_table[]{ 0, 1, 2, 4, 8, 32, 48, -1 };
@@ -8,13 +9,13 @@ char ADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 	int temp = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		reg_file.PSW.V = ~(WORD_MSBi(reg_file.REG[dst_reg].word) ^ WORD_MSBi(temp));
+		reg_file.PSW.V = ~(WORD_MSBi_value(reg_file.REG[dst_reg].word) ^ WORD_MSBi_value(temp));
 		temp += reg_file.REG[dst_reg].word;
 		reg_file.REG[dst_reg].word = temp;
 		reg_file.PSW.C = BIT_CHECK(temp, WORD_OP_CARRY_BIT);
 	}
 	else {
-		reg_file.PSW.V = ~(BYTE_MSBi(reg_file.REG[dst_reg].word) ^ BYTE_MSBi(temp));
+		reg_file.PSW.V = ~(BYTE_MSBi_value(reg_file.REG[dst_reg].word) ^ BYTE_MSBi_value(temp));
 		temp = (char)temp + reg_file.REG[dst_reg].LSB;
 		reg_file.REG[dst_reg].LSB = temp;
 		reg_file.PSW.C = BIT_CHECK(temp, BYTE_OP_CARRY_BIT);
