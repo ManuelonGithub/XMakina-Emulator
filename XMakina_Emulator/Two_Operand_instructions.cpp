@@ -13,6 +13,7 @@ char ADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 		temp += reg_file.REG[dst_reg].word;
 		reg_file.REG[dst_reg].word = temp;
 		reg_file.PSW.C = BIT_CHECK(temp, WORD_OP_CARRY_BIT);
+
 	}
 	else {
 		reg_file.PSW.V = ~(BYTE_MSBi_value(reg_file.REG[dst_reg].word) ^ BYTE_MSBi_value(temp));
@@ -20,8 +21,6 @@ char ADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 		reg_file.REG[dst_reg].LSB = temp;
 		reg_file.PSW.C = BIT_CHECK(temp, BYTE_OP_CARRY_BIT);
 	}
-
-
 
 	return PROCESS_SUCCESS;
 }

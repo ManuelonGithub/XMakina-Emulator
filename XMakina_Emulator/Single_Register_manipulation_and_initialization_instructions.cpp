@@ -74,7 +74,7 @@ char RRC(char word_byte_control, char dst_reg)
 		BIT_CHANGE(reg_file.REG[dst_reg].word, WORD_MSBi, reg_file.PSW.C);
 
 		reg_file.PSW.V ^= BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
-		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].LSB, WORD_MSBi);
+		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
 		reg_file.PSW.Z = !(reg_file.REG[dst_reg].word ^ 0);
 	}
 	else {
@@ -123,7 +123,9 @@ char SXT(char word_byte_control, char dst_reg)
 
 	reg_file.REG[dst_reg].MSB = (LOW_BYTE_MASK & BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi));
 
-
+	reg_file.PSW.V = 0;
+	reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
+	reg_file.PSW.Z = !(reg_file.REG[dst_reg].word ^ 0);
 
 	return PROCESS_SUCCESS;
 }
