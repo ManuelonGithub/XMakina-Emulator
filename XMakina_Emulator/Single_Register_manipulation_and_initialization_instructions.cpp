@@ -4,7 +4,8 @@
 #include "Bus_Devices_Interrupt_operations.h"
 
 char (*register_initialization_execution[]) (char, unsigned short) = { MOVL, MOVLZ, MOVH };
-char(*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
+char (*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
+
 
 /*********************** Register Initialization **********************/
 char MOVL(char dst_reg, unsigned short value)

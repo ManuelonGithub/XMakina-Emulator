@@ -9,6 +9,8 @@
 #define CONSTANT 1
 #define WORD_OP_CARRY_BIT 17
 #define BYTE_OP_CARRY_BIT 8
+#define NO_CARRY 0
+#define SUBBING_TERM 1
 
 extern XMakina_register_file reg_file;
 
@@ -38,6 +40,7 @@ typedef struct two_operand_instruction {
 	unsigned short inst_category : 2;
 } two_operand_instruction;
 
+unsigned short arrithmetic(unsigned short src, unsigned short dst, unsigned short carry, char word_byte_ctrl);
 
 char ADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg);
 char ADDC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg);

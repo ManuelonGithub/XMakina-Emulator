@@ -154,17 +154,24 @@ void execute()
 		break;
 
 	case (TWO_OPERAND_INST):
-		printf("Executing a two-operand instruction.\n");
-		emulation.current_cycle_status = INVALID_INST;
+		if (inst_set.two_op->inst_code > TWO_OP_INST_CODE_LIMIT)
+		{
+			emulation.current_cycle_status = INVALID_INST;
+		}
+		else {
+			emulation.current_cycle_status =
+				(two_operand_execution[inst_set.two_op->inst_code]) (inst_set.two_op->REG_CON_ctrl, inst_set.two_op->W_B_ctrl, inst_set.two_op->source, inst_set.two_op->dst_reg);
+
+		}
 		break;
 
 	case (SINGLE_REGISTER_INST):
-		if (inst_set.single_reg->inst_code < SINGLE_REG_INST_CODE_LIMIT) {
-			emulation.current_cycle_status =
-				(*single_register_execution[inst_set.single_reg->inst_code]) (inst_set.single_reg->W_B_ctrl, inst_set.single_reg->dst_reg);
+		if (inst_set.single_reg->inst_code > SINGLE_REG_INST_CODE_LIMIT) {
+			emulation.current_cycle_status = INVALID_INST;
 		}
 		else{
-			emulation.current_cycle_status = INVALID_INST;
+			emulation.current_cycle_status =
+				(*single_register_execution[inst_set.single_reg->inst_code]) (inst_set.single_reg->W_B_ctrl, inst_set.single_reg->dst_reg);
 		}
 		
 		break;
