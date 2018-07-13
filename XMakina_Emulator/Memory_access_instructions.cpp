@@ -42,7 +42,6 @@ char LD(char action, char word_byte_control, char src_reg, char dst_reg)
 	}
 
 	bus(sys_reg.MAR, &sys_reg.MBR, word_byte_control, READ);
-	//reg_file.REG[dst_reg] = (word_byte_control == WORD) ? sys_reg.MBR : LOW_BYTE_OVERWRITE(reg_file.REG[dst_reg], sys_reg.MBR);
 
 	if (word_byte_control == WORD) {
 		reg_file.REG[dst_reg].word = sys_reg.MBR;

@@ -175,6 +175,7 @@
     </ClCompile>
     <ClCompile Include="Two_Operand_instructions.cpp" />
     <ClCompile Include="XMakina_Emulator.cpp" />
+    <ClCompile Include="XMakina_Emulator_entities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="S_Record_test.txt" />

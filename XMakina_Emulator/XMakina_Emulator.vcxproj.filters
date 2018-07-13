@@ -80,6 +80,9 @@
     <ClCompile Include="Two_Operand_instructions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XMakina_Emulator_entities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="S_Record_test.txt">

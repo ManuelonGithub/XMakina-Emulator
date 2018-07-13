@@ -37,26 +37,21 @@ char SRA(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SRA instruction.\n");
 
-	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi);		// PSW.C instruction effect. PSW.C becomes the value of destination reg's LSBi
+	register_format temp_res = reg_file.REG[dst_reg];
 
 	if (word_byte_control == WORD) {
-		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].LSB, WORD_MSBi);	// PSW.N instruction effect. Because the instruction will sign extend, PSW.N flag can be set here.
-
-		SINGLE_RIGHT_SHIFT(reg_file.REG[dst_reg].word);
-		BIT_CHANGE(reg_file.REG[dst_reg].word, WORD_MSBi, reg_file.PSW.N);	// Sign extension using the value stored in PSW.N
-
-		reg_file.PSW.Z = !(reg_file.REG[dst_reg].word ^ 0);					// PSW.Z instruction effect. This operation will be true if the value in the register is 0.
+		SINGLE_RIGHT_SHIFT(temp_res.word);
+		BIT_CHANGE(temp_res.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
 	}
-	else {																	// The Byte variation of the instruction. It is very similar, but the entities used are completely different.
-		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi);	// PSW.N instruction effect. Because the instruction will sign extend, PSW.N flag can be set here.
-
-		SINGLE_RIGHT_SHIFT(reg_file.REG[dst_reg].LSB);
-		BIT_CHANGE(reg_file.REG[dst_reg].LSB, BYTE_MSBi, reg_file.PSW.N);	// Sign extension using the value stored in PSW.N
-
-		reg_file.PSW.Z = !(reg_file.REG[dst_reg].LSB ^ 0);					// PSW.Z instruction effect. This operation will be true if the value in the register is 0.
+	else {
+		SINGLE_RIGHT_SHIFT(temp_res.LSB);
+		BIT_CHANGE(temp_res.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
 	}
+	
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, temp_res.word, word_byte_control);
+	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);
 
-	reg_file.PSW.V = 0;		// SRA clears the Overflow bit.
+	reg_file.REG[dst_reg] = temp_res;
 
 	return PROCESS_SUCCESS;
 }
@@ -65,31 +60,21 @@ char RRC(char word_byte_control, char dst_reg)
 {
 	printf("Executing a RRC instruction.\n");
 
-	reg_file.PSW.unused_bits = LSBi(reg_file.REG[dst_reg].LSB);	// Using the unused space in the PSW to temporarely store the value of the LSBi, 
-																// so it doesn't get lost during the bit rotation.
+	register_format temp_res = reg_file.REG[dst_reg];
+
 	if (word_byte_control == WORD) {
-		reg_file.PSW.V = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
-
-		SINGLE_RIGHT_SHIFT(reg_file.REG[dst_reg].word);
-		BIT_CHANGE(reg_file.REG[dst_reg].word, WORD_MSBi, reg_file.PSW.C);
-
-		reg_file.PSW.V ^= BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
-		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
-		reg_file.PSW.Z = !(reg_file.REG[dst_reg].word ^ 0);
+		SINGLE_RIGHT_SHIFT(temp_res.word);
+		BIT_CHANGE(temp_res.word, WORD_MSBi, reg_file.PSW.C);
 	}
 	else {
-		reg_file.PSW.V = BIT_CHECK(reg_file.REG[dst_reg].word, BYTE_MSBi);
-
-		SINGLE_RIGHT_SHIFT(reg_file.REG[dst_reg].LSB);
-		BIT_CHANGE(reg_file.REG[dst_reg].LSB, BYTE_MSBi, reg_file.PSW.C);
-
-		reg_file.PSW.V ^= BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi);
-		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi);
-		reg_file.PSW.Z = !(reg_file.REG[dst_reg].LSB ^ 0);
+		SINGLE_RIGHT_SHIFT(temp_res.LSB);
+		BIT_CHANGE(temp_res.LSB, BYTE_MSBi, reg_file.PSW.C);
 	}
 
-	reg_file.PSW.C = reg_file.PSW.unused_bits;
-	reg_file.PSW.unused_bits = 0;
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, temp_res.word, word_byte_control);
+	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);
+
+	reg_file.REG[dst_reg] = temp_res;
 
 	return PROCESS_SUCCESS;
 }
@@ -98,10 +83,10 @@ char SWPB(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SWPB instruction.\n");
 
-	unsigned short temp = reg_file.REG[dst_reg].MSB;
+	register_format temp_res = reg_file.REG[dst_reg];
 
-	reg_file.REG[dst_reg].MSB = reg_file.REG[dst_reg].LSB;
-	reg_file.REG[dst_reg].LSB = temp;
+	reg_file.REG[dst_reg].MSB = temp_res.LSB;
+	reg_file.REG[dst_reg].LSB = temp_res.MSB;
 	
 	return PROCESS_SUCCESS;
 }
@@ -121,11 +106,13 @@ char SXT(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SXT instruction.\n");
 
-	reg_file.REG[dst_reg].MSB = (LOW_BYTE_MASK & BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi));
+	register_format temp_res = reg_file.REG[dst_reg];
 
-	reg_file.PSW.V = 0;
-	reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
-	reg_file.PSW.Z = !(reg_file.REG[dst_reg].word ^ 0);
+	temp_res.MSB = (LOW_BYTE_MASK & BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi));
+	
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, temp_res.word, word_byte_control);
+
+	reg_file.REG[dst_reg] = temp_res;
 
 	return PROCESS_SUCCESS;
 }

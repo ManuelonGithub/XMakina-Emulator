@@ -19,9 +19,9 @@
 #define HIGH_BYTE_OVERWRITE(dst, value) ((dst & LOW_BYTE_MASK) | (value & HIGH_BYTE_MASK))
 #define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
 #define BIT_CHECK(src, bit) ((src >> bit) & 1)
-#define LSBi(value) (value & 0x1)
-#define WORD_MSBi_value(word) (word & 0x8000)
-#define BYTE_MSBi_value(byte) (byte & 0x80)
+#define WORD_MSBi 15
+#define BYTE_MSBi 7
+#define LSBi 0
 
 #define MAX_PROG_NAME_SIZE 30
 
@@ -43,6 +43,8 @@
 enum OPERATION_SIZE { WORD, BYTE };
 enum PROCESS_FLAGS { PROCESS_FAILURE, PROCESS_SUCCESS };
 enum BIT_MANIP { CLEAR, SET };
+
+void update_PSW(unsigned short src, unsigned short dst, unsigned short res, unsigned char W_B_ctrl);	// The function is here due to multiple functions requiring it.
 
 typedef struct Device_port {
 	union {
