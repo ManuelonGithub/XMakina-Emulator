@@ -14,6 +14,7 @@
 #include "Loader.h"
 #include "CPU_operations.h"
 
+debugger_breakpoints breakpoints;
 
 /* Debugger Main Menu function:
  * This function serves as the debugger's main menu,
@@ -120,8 +121,12 @@ void breakpoint_menu()
 		switch (menu_option)
 		{
 		case (VIEW_CURRENT_BREAKPOINTS):
+			view_current_breakpoints();
+			break;
 
 		case (SET_MEM_BREAKPOINT):
+			set_mem_breakpoint();
+			break;
 
 		case (SET_CLOCK_OFFSET_BREAKPOINT):
 
@@ -144,6 +149,48 @@ void breakpoint_menu()
 	}
 }
 
+void view_current_breakpoints()
+{
+	int i;
+
+	printf("Memory Breakpoints: \t");
+	for (i = 0; i < MEM_BREAKPOINT_SIZE; i++) {
+		if (breakpoints.memory[i] != OFF) {
+			printf("%04X, ", breakpoints.memory[i]);
+		}
+	}
+	printf("\n\nClock-offset Breakpoint: \t");
+	if (breakpoints.clock_offset != OFF) {
+		printf("%04X, ", breakpoints.clock_offset);
+	}
+	else {
+		printf("Not enabled.");
+	}
+	printf("\n\nPriority change breakpoint: \t");
+	if (breakpoints.priority != OFF) {
+		printf("Enabled.");
+	}
+	else {
+		printf("Not enabled.");
+	}
+	printf("Program stepping: \t");
+	if (breakpoints.step != OFF) {
+		printf("Enabled.");
+	}
+	else {
+		printf("Not enabled.");
+	}
+}
+
+void set_mem_breakpoint()
+{
+
+}
+
+void clear_all_breakpoints()
+{
+
+}
 /* Register File Options function:
  * Displays the register file and their contents.
  * Offers the user the ability to change the contents of a register.
@@ -469,5 +516,10 @@ void test_inst_opcode()
 		printf("\nInvalid input. Instruction opcode testing has been cancelled.\n\n");
 		break;
 	}
+}
+
+void debugger_triggers()
+{
+
 }
 

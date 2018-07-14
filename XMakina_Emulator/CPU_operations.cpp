@@ -201,7 +201,3 @@ void execute()
 		break;
 	}
 }
-
-void debugger_tiggers()
-{
-}

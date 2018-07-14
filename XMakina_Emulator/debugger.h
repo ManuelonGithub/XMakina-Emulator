@@ -23,6 +23,7 @@ extern union XMakina_instruction_set inst_set;
 
 #define MAX_16_BIT_VALUE (1 << 16)
 #define MAX_8_BIT_VALUE (1 << 8)
+#define MEM_BREAKPOINT_SIZE 32
 
 enum DEBUGGER_MENU_OPTIONS {
 	BREAKPOINT_MENU = 'B', RUN_PROGRAM = 'G', CLOSE_PROGRAM = 'X', 
@@ -37,6 +38,14 @@ enum VIEW_REG_FILE_OPTIONS { CHANGE_REG_VALUE = 'C' };
 enum VIEW_MEMORY_MENU { TOP_BOTTOM_LIMIT_MEM_VIEW = 'L', BASE_AND_OFFSET_MEM_VIEW = 'O', CHANGE_MEM_VALUE = 'C' };
 enum SANITY_CHECK_OPTIONS { VIEW_CURRENT_SANITY_CHECK = 'S', CHANGE_SANITY_CHECK_VALUE = 'C' };
 enum COMMON_MENU_OPTIONS { BACK_TO_DEBUGGER_MENU = 'Q', MENU_HELP = 'H' };
+enum DEBUGGER_FEATURES_STATE {OFF = -1};
+
+typedef struct debugger_breakpoints {
+	unsigned short memory[MEM_BREAKPOINT_SIZE];
+	unsigned int clock_offset;
+	unsigned char priority;
+	unsigned char step;
+} debugger_breakpoints;
 
 char debugger_main_menu();
 
@@ -55,5 +64,7 @@ void sanity_check_options();
 void close_program();
 
 void test_inst_opcode();
+
+void debugger_triggers();
 
 #endif // !DEBUGGER_H
