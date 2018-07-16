@@ -37,9 +37,9 @@
 #define TRUE 1
 #define FALSE 0
 
-#define PC_BYTE_STEP 1
-#define PC_WORD_STEP (PC_BYTE_STEP*2)
-#define PC_NO_INC 0
+#define BYTE_STEP 1
+#define WORD_STEP (BYTE_STEP*2)
+#define NO_INC 0
 #define MEMORY_ACCESS_CLK_INC 3
 #define NORMAL_OP_CLK_INC 1
 
@@ -63,12 +63,6 @@ typedef struct Device_port {
 	unsigned char data;
 } Device_port;
 
-typedef struct Emulated_device {
-	Device_port * dev_port;
-	int proc_time;
-	int time_left;
-} Emulated_device;
-
 typedef union XMakina_memory {
 	unsigned char byte[MEM_SIZE_BYTES];
 	unsigned short word[MEM_SIZE_WORDS];
@@ -84,7 +78,8 @@ typedef union PSW_reg_format {
 		unsigned short SLP : 1;
 		unsigned short V : 1;
 		unsigned short PRIORITY : 3;
-		unsigned short unused_bits : 8;
+		unsigned short res : 5;
+		unsigned short prev_PRIORITY : 3;
 	};
 } PSW_reg_format;
 
@@ -120,6 +115,7 @@ typedef struct System_registers {
 	unsigned short MAR;
 	unsigned short MBR;
 	IX_bit_format IX;
+	register_format temp_reg;
 } System_registers;
 
 typedef struct Emulation_properties {
@@ -133,5 +129,22 @@ typedef struct Emulation_properties {
 	};
 	unsigned char ctrl_C_detected;
 } Emulation_properties;
+
+typedef struct device_interrupt_vector {
+	union {
+		unsigned short * word[2];
+		struct {
+			PSW_reg_format * INT_PSW;
+			register_format * INT_PC;
+		};
+	};
+} device_interrupt_vector;
+
+typedef struct Emulated_device {
+	device_interrupt_vector int_vector;
+	Device_port * dev_port;
+	int proc_time;
+	int time_left;
+} Emulated_device;
 
 #endif // !XMAKINA_EMULATOR_ENTITIES_H

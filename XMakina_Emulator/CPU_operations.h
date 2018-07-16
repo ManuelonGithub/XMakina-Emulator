@@ -1,12 +1,13 @@
 /*
-* X-Makina Emulator Project - CPU_operations.h
-* Debugger header contains all the function prototypes and definitions used during the XMakine machine emulation
-*
-* Programmer: Manuel Burnay
-*
-*
-* Date created: 30/06/2018
-*/
+ * X-Makina Emulator Project - CPU_operations.h
+ * Contains the function prototypes and definitions used during a XMakine machine CPU cycle
+ * (except the execution for the instructions, they have been split between multiple files to keep the code organized)
+ *
+ * Programmer: Manuel Burnay
+ *
+ *
+ * Date created: 30/06/2018
+ */
 
 #include "XMakina_Emulator_entities.h"
 #include "Branching_instructions.h"
@@ -79,7 +80,7 @@ extern char (*relative_memory_access_execution[]) (signed short, char, char, cha
 extern char (*single_register_execution[]) (char, char);
 char(*two_operand_execution[]) (char, char, char, char);;
 
-char CPU_cycle();
+void CPU_cycle();
 void fetch();
 void decode();
 void execute();

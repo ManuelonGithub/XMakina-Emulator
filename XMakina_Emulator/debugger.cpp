@@ -493,8 +493,8 @@ void change_mem_content()
 
 void base_offset_memory_view()
 {
-	unsigned int base_mem_loc, bottom_lim, top_lim;
-	int offset, i;
+	unsigned int base_mem_loc, bottom_lim, top_lim, i;
+	int offset;
 
 	printf("\nInput the hex value of the base address:\t0x");
 	scanf_s("%x", &base_mem_loc);
@@ -636,7 +636,7 @@ void debugger_triggers()
 	}
 
 	else if (breakpoints.branch == ON) {
-		if (breakpoints.PC_check != (reg_file.PC.word - PC_WORD_STEP)) {
+		if (breakpoints.PC_check != (reg_file.PC.word - WORD_STEP)) {
 			debugger_main_menu();
 		}
 		else {

@@ -1,12 +1,13 @@
 /*
-* X-Makina Emulator Project - CPU_operations.cpp
-* CPU_operations file contains all the functions that pertain to the XMakina machine emulation
-*
-* Programmer: Manuel Burnay
-*
-*
-* Date created: 30/06/2018
-*/
+ * X-Makina Emulator Project - CPU_operations.cpp
+ * CPU_operations file contains all the functions that pertain to a XMakine machine CPU cycle 
+ * (except the execution for the instructions, they have been split between multiple files to keep the code organized)
+ *
+ * Programmer: Manuel Burnay
+ *
+ *
+ * Date created: 30/06/2018
+ */
 
 #include "stdafx.h"
 #include "CPU_operations.h"
@@ -24,30 +25,36 @@ XMakina_instruction_set inst_set;
  */
 
 
-char CPU_cycle()
+void CPU_cycle()
 {
 	inst_set.opcode = &sys_reg.IX.word;
 
-	fetch();
-	if (emulation.current_cycle_status == PROCESS_FAILURE) {
-		printf("Problem has occurred during the Fetch process. Invalid value in PC (= 0x%04X).\n", reg_file.PC.word);
-		return emulation.current_cycle_status;
+	if (reg_file.PSW.SLP == DISABLED) {
+		fetch();
+		emulation.sys_clk += NORMAL_OP_CLK_INC;
+		emulation.run_clk += NORMAL_OP_CLK_INC;
+		if (emulation.current_cycle_status == PROCESS_FAILURE) {
+			printf("Problem has occurred during the Fetch process. Invalid value in PC (= 0x%04X).\n", reg_file.PC.word);
+			return;
+		}
+
+
+		decode();
+		emulation.sys_clk += NORMAL_OP_CLK_INC;
+		emulation.run_clk += NORMAL_OP_CLK_INC;
+		if (emulation.current_cycle_status == INVALID_INST) {
+			printf("Problem has occurred during the Decode process. Invalid data was fetched (= 0x%04X).\n", sys_reg.IX.word);
+			return;
+		}
+
+		execute();
+		emulation.sys_clk += NORMAL_OP_CLK_INC;
+		emulation.run_clk += NORMAL_OP_CLK_INC;
+		if (emulation.current_cycle_status == INVALID_INST) {
+			printf("Invalid data has been attempted to be executed. Invalid data fetched = 0x%04X.\n", sys_reg.IX.word);
+			return;
+		}
 	}
-
-
-	decode();
-	if (emulation.current_cycle_status == INVALID_INST) {
-		printf("Problem has occurred during the Decode process. Invalid data was fetched (= 0x%04X).\n", sys_reg.IX.word);
-		return emulation.current_cycle_status;
-	}
-
-	execute();
-	if (emulation.current_cycle_status == INVALID_INST) {
-		printf("Invalid data has been attempted to be executed. Invalid data fetched = 0x%04X.\n", sys_reg.IX.word);
-		return emulation.current_cycle_status;
-	}
-
-	return 0;
 }
 
 /* Fetch function:
@@ -56,21 +63,20 @@ char CPU_cycle()
  */
 void fetch()
 {
-	if (reg_file.PC.word % 2 != 0) {					// Program counter should not have an odd value
+	if (reg_file.PC.word % 2 != 0) {			// Program counter should not have an odd value
 		if (reg_file.PC.word == LAST_BYTE) {
-			interrupt_return_process();	// This is the only exception to the rule
+			interrupt_return_process();			// This is the only exception to the rule
 		}
 		else {
 			emulation.current_cycle_status = PROCESS_FAILURE;	// If the exception isn't met, the cycle is stopped and the user is notified of the error
 			return;
 		}
 	}
-	else {
-		sys_reg.MAR = reg_file.PC.word;
-		bus(sys_reg.MAR, &sys_reg.MBR, WORD, READ);
-		sys_reg.IX.word = sys_reg.MBR;
-		reg_file.PC.word += PC_WORD_STEP;
-	}
+
+	sys_reg.MAR = reg_file.PC.word;
+	bus(WORD, READ);
+	sys_reg.IX.word = sys_reg.MBR;
+	reg_file.PC.word += WORD_STEP;
 
 	//emulation.sys_clk += NORMAL_OP_CLK_INC;
 
