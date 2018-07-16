@@ -15,8 +15,8 @@
 #define HIGH_BYTE_SHIFT(x) (x*(1 << 8))
 #define LOW_BYTE_MASK 0x00FF
 #define HIGH_BYTE_MASK 0xFF00
-#define LOW_BYTE_OVERWRITE(dst, value) ((dst & HIGH_BYTE_MASK) | (value & LOW_BYTE_MASK))
-#define HIGH_BYTE_OVERWRITE(dst, value) ((dst & LOW_BYTE_MASK) | (value & HIGH_BYTE_MASK))
+//#define LOW_BYTE_OVERWRITE(dst, value) ((dst & HIGH_BYTE_MASK) | (value & LOW_BYTE_MASK))
+//#define HIGH_BYTE_OVERWRITE(dst, value) ((dst & LOW_BYTE_MASK) | (value & HIGH_BYTE_MASK))
 #define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
 #define BIT_CHECK(src, bit) ((src >> bit) & 1)
 #define WORD_MSBi 15
@@ -24,15 +24,18 @@
 #define LSBi 0
 
 #define MAX_PROG_NAME_SIZE 30
-
+#define XMAKINA_CPU_REG_COUNT 8
+#define DEVICE_NUMBER_SUPPORTED 8
 #define MEM_SIZE_BYTES (1 << 16)
 #define MEM_SIZE_WORDS (1 << 15)
+
 #define LAST_WORD (MEM_SIZE_WORDS - 1)
 #define LAST_BYTE (MEM_SIZE_BYTES - 1)
 #define WORD_ADDR_CONV(byte_addr) (byte_addr >> 1)
 #define BYTE_ADDR_CONV(word_addr) (word_addr << 1)
-#define XMAKINA_CPU_REG_COUNT 8
-#define DEVICE_NUMBER_SUPPORTED 8
+
+#define TRUE 1
+#define FALSE 0
 
 #define PC_BYTE_STEP 1
 #define PC_WORD_STEP (PC_BYTE_STEP*2)
@@ -60,11 +63,11 @@ typedef struct Device_port {
 	unsigned char data;
 } Device_port;
 
-typedef struct Device {
+typedef struct Emulated_device {
 	Device_port * dev_port;
 	int proc_time;
 	int time_left;
-} Device;
+} Emulated_device;
 
 typedef union XMakina_memory {
 	unsigned char byte[MEM_SIZE_BYTES];
@@ -121,12 +124,14 @@ typedef struct System_registers {
 
 typedef struct Emulation_properties {
 	unsigned int sys_clk;
+	unsigned int run_clk;
 	char program_name[MAX_PROG_NAME_SIZE];
-	char system_status = '\0';
+	char system_status;
 	union {
 		char current_cycle_status;
 		char current_cycle_inst_type;
 	};
+	unsigned char ctrl_C_detected;
 } Emulation_properties;
 
 #endif // !XMAKINA_EMULATOR_ENTITIES_H

@@ -84,7 +84,5 @@ void fetch();
 void decode();
 void execute();
 
-void debugger_tiggers();
-
 #endif // !CPU_OPERATIONS_H
 

@@ -30,9 +30,10 @@ char CPU_cycle()
 
 	fetch();
 	if (emulation.current_cycle_status == PROCESS_FAILURE) {
-		printf("Problem has occurred during the Fetch process. Invalid value in PC (= 0x%04X).\n", reg_file.PC);
+		printf("Problem has occurred during the Fetch process. Invalid value in PC (= 0x%04X).\n", reg_file.PC.word);
 		return emulation.current_cycle_status;
 	}
+
 
 	decode();
 	if (emulation.current_cycle_status == INVALID_INST) {

@@ -28,43 +28,52 @@ extern union XMakina_instruction_set inst_set;
 enum DEBUGGER_MENU_OPTIONS {
 	BREAKPOINT_MENU = 'B', RUN_PROGRAM = 'G', CLOSE_PROGRAM = 'X', 
 	QUIT_EMULATOR = 'Q', REG_FILE_OPTIONS = 'R', MEMORY_MENU = 'M', 
-	SANITY_CHECK_OPTIONS = 'S', LOAD_PROGRAM = 'L', INST_OPCODE_TEST = 'I'
+	LOAD_PROGRAM = 'L', LOAD_DEVICE_FILE = 'D', INST_OPCODE_TEST = 'I'
 };
 enum BREAKPOINT_MENU { 
-	VIEW_CURRENT_BREAKPOINTS = 'V', SET_MEM_BREAKPOINT = 'M', 
-	SET_CLOCK_OFFSET_BREAKPOINT = 'O', PRIORITY_CHANGE_BREAKPOINT = 'P' 
+	SET_MEM_BREAKPOINT = 'M', BRANCHING_BREAKPOINT = 'B',
+	SET_CLOCK_CYCLE_BREAKPOINT = 'C', PRIORITY_CHANGE_BREAKPOINT = 'P', 
+	PROGRAM_STEP = 'S'
 };
-enum VIEW_REG_FILE_OPTIONS { CHANGE_REG_VALUE = 'C' };
+
+enum VIEW_REG_FILE_OPTIONS { CHANGE_REG_VALUE = 'C', CLEAR_ALL_REGS = 'X' };
 enum VIEW_MEMORY_MENU { TOP_BOTTOM_LIMIT_MEM_VIEW = 'L', BASE_AND_OFFSET_MEM_VIEW = 'O', CHANGE_MEM_VALUE = 'C' };
-enum SANITY_CHECK_OPTIONS { VIEW_CURRENT_SANITY_CHECK = 'S', CHANGE_SANITY_CHECK_VALUE = 'C' };
 enum COMMON_MENU_OPTIONS { BACK_TO_DEBUGGER_MENU = 'Q', MENU_HELP = 'H' };
-enum DEBUGGER_FEATURES_STATE {OFF = -1};
+enum DEBUGGER_FEATURES_STATE {OFF = -1, ON = 1};
 
 typedef struct debugger_breakpoints {
-	unsigned short memory[MEM_BREAKPOINT_SIZE];
-	unsigned int clock_offset;
+	unsigned short memory;
+	unsigned int clock_cycle;
+	unsigned int cycle_count;
+	signed char branch;
+	unsigned short PC_check;
 	unsigned char priority;
-	unsigned char step;
+	signed char step;
 } debugger_breakpoints;
 
-char debugger_main_menu();
+void debugger_main_menu();
 
 void breakpoint_menu();
+void view_current_breakpoints();
+void set_mem_breakpoint();
+void set_clock_cycle_breakpoint();
+void toggle_priority_change_breakpoint();
 
 void reg_file_options();
 void change_reg_content();
+void clear_all_reg_values();
 
 void memory_menu();
 void top_bottom_memory_view();
 void change_mem_content();
-//void base_offset_memory_view();
-
-void sanity_check_options();
+void base_offset_memory_view();
 
 void close_program();
 
 void test_inst_opcode();
 
 void debugger_triggers();
+
+void clear_emulation_properties();
 
 #endif // !DEBUGGER_H

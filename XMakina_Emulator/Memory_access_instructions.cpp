@@ -114,6 +114,7 @@ char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg
 	return PROCESS_SUCCESS;
 }
 
+
 char STR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
 {
 	printf("Executing a STR instruction.\n");

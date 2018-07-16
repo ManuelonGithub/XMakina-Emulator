@@ -13,6 +13,7 @@
 #include "debugger.h"
 #include "Loader.h"
 #include "CPU_operations.h"
+#include "Bus_Devices_Interrupt_operations.h"
 
 debugger_breakpoints breakpoints;
 
@@ -23,7 +24,7 @@ debugger_breakpoints breakpoints;
  * To ease the clutter inherant to a console user interface, 
  * the menu doesn't show the options it can provide to the user, but instead it is behind a "help" option.
  */
-char debugger_main_menu()
+void debugger_main_menu()
 {
 	char menu_option;
 
@@ -39,7 +40,7 @@ char debugger_main_menu()
 
 		menu_option = 0;
 		
-		printf("MAIN MENU: Input your option (Input H for menu options):\t");
+		printf("Input your option (Input H for menu options):\t");
 		scanf_s(" %c", &menu_option, 1);
 		menu_option = toupper(menu_option);
 
@@ -56,7 +57,8 @@ char debugger_main_menu()
 				printf("System hasn't loaded a program yet.\n");
 			}
 			else {
-				return RUN_PROGRAM;
+				emulation.system_status = RUN_PROGRAM;
+				return;
 			}
 			break;
 
@@ -65,7 +67,8 @@ char debugger_main_menu()
 			break;
 
 		case (QUIT_EMULATOR):
-			return QUIT_EMULATOR;
+			emulation.system_status = QUIT_EMULATOR;
+			return;
 			break;
 
 		case (REG_FILE_OPTIONS):
@@ -76,12 +79,12 @@ char debugger_main_menu()
 			memory_menu();
 			break;
 
-		case (SANITY_CHECK_OPTIONS):
-			sanity_check_options();
-			break;
-
 		case (LOAD_PROGRAM):
 			loader();
+			break;
+
+		case (LOAD_DEVICE_FILE):
+			device_init();
 			break;
 
 		case (INST_OPCODE_TEST):
@@ -91,7 +94,7 @@ char debugger_main_menu()
 		case (MENU_HELP):
 			printf("Main Menu options:\n");
 			printf("B = Breakpoint menu | G = \"Go\" or Run program  | Q = Quit program | R = Register File Menu\n");
-			printf("M = Memory Menu     | S = Sanity check Options | L = Load program | X = Close Porgram\n");
+			printf("M = Memory Menu     | S = Sanity check Options | L = Load file | X = Close Porgram\n");
 			printf("I = Instruction Opcode testing\n\n");
 			break;
 
@@ -111,35 +114,68 @@ char debugger_main_menu()
 void breakpoint_menu()
 {
 	char menu_option;
-	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Breakpoints ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
-
-	printf("\nInput your option (Input H for menu options):\t");
-	scanf_s(" %c", &menu_option, 1);
-	menu_option = toupper(menu_option);
 
 	while (1) {
+		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Breakpoints ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
+
+		view_current_breakpoints();
+
+		printf("\nInput your option (Input H for menu options):\t");
+		scanf_s(" %c", &menu_option, 1);
+		menu_option = toupper(menu_option);
+
 		switch (menu_option)
 		{
-		case (VIEW_CURRENT_BREAKPOINTS):
-			view_current_breakpoints();
-			break;
-
 		case (SET_MEM_BREAKPOINT):
 			set_mem_breakpoint();
 			break;
 
-		case (SET_CLOCK_OFFSET_BREAKPOINT):
+		case (SET_CLOCK_CYCLE_BREAKPOINT):
+			set_clock_cycle_breakpoint();
+			break;
+
+		case (BRANCHING_BREAKPOINT):
+			breakpoints.branch = (breakpoints.branch == OFF) ? ON : OFF;
+			breakpoints.PC_check = reg_file.PC.word;
+			break;
 
 		case (PRIORITY_CHANGE_BREAKPOINT):
+			toggle_priority_change_breakpoint();
+			break;
+
+		case (PROGRAM_STEP):
+			breakpoints.step = (breakpoints.step == OFF) ? ON : OFF;
+			break;
 
 		case (BACK_TO_DEBUGGER_MENU):
 			return;
 			break;
 
 		case (MENU_HELP):
-			printf("\nBreakpoint Menu options:\n");
-			printf("V = View Current Breakpoints   | M = Set Memory Breakpoint | O = Set Clock Offset Breakpoint\n");
-			printf("P = Priority Change Breakpoint | Q = Back to Main Menu\n");
+			printf("\nBreakpoint Menu options:\n\n");
+			printf("M = Set Memory Breakpoint\n");
+			printf("The program will break once the PC counter matches a memory addess set by the user.\n");
+			printf("When a match occurs, the memory breakpoint will reset to being off.\n\n");
+
+			printf("O = Set Clock Offset Breakpoint\n");
+			printf("Clock offset breakpoint will break the program once the system clock\n");
+			printf("has been incremented to be equal or higher than the value set by the user.\n");
+			printf("When a match occurs, the memory breakpoint will reset to being off.\n\n");
+
+			printf("B = Toggle Branching Breakpoint\n");
+			printf("If enabled, program will break when a branching jump has been detected.\n");
+			printf("This breakpoint setting will stay on until toggled otherwise.\n\n");
+
+			printf("P = Toggle Priority Change Breakpoint\n");
+			printf("If enabled,the system will memorize the current priority,\n");
+			printf("and will make the program will break when a priority change is noticed.\n");
+			printf("This breakpoint setting will stay on until toggled otherwise.\n\n");
+
+			printf("S = Toggle program step\n");
+			printf("If enabled, program will break every clock cycle.\n");
+			printf("This breakpoint setting will stay on until toggled otherwise.\n\n");
+
+			printf("Q = Back to Main Menu\n\n");
 			break;
 
 		default:
@@ -151,46 +187,101 @@ void breakpoint_menu()
 
 void view_current_breakpoints()
 {
-	int i;
+	printf("Memory Breakpoint: \t\t");
+	if ((signed short)breakpoints.memory != OFF) {
+		printf("0x%04X ", breakpoints.memory);
+	}
+	else {
+		printf("Not enabled.");
+	}
 
-	printf("Memory Breakpoints: \t");
-	for (i = 0; i < MEM_BREAKPOINT_SIZE; i++) {
-		if (breakpoints.memory[i] != OFF) {
-			printf("%04X, ", breakpoints.memory[i]);
-		}
-	}
-	printf("\n\nClock-offset Breakpoint: \t");
-	if (breakpoints.clock_offset != OFF) {
-		printf("%04X, ", breakpoints.clock_offset);
+	printf("\nClock-cycle Breakpoint: \t");
+	if ((signed int)breakpoints.clock_cycle != OFF) {
+		printf("%d Clock cycles", breakpoints.clock_cycle);
 	}
 	else {
 		printf("Not enabled.");
 	}
-	printf("\n\nPriority change breakpoint: \t");
-	if (breakpoints.priority != OFF) {
+
+	printf("\nBranching Breakpoint: \t\t");
+	if (breakpoints.branch == ON) {
 		printf("Enabled.");
 	}
 	else {
 		printf("Not enabled.");
 	}
-	printf("Program stepping: \t");
-	if (breakpoints.step != OFF) {
-		printf("Enabled.");
+
+	printf("\nPriority change breakpoint: \t");
+	if ((signed char)breakpoints.priority == OFF) {
+		printf("Not enabled.");
 	}
 	else {
-		printf("Not enabled.");
+		printf("Enabled.");
+	}
+
+	printf("\nProgram stepping: \t\t");
+	if (breakpoints.step == ON) {
+		printf("Enabled.\n");
+	}
+	else {
+		printf("Not enabled.\n");
 	}
 }
+
 
 void set_mem_breakpoint()
 {
+	unsigned int mem_brkpt;
 
+	printf("\n\nSetting a new memory breakpoint will overwrite the previous set memory breakpoint.\n");
+	printf("Inputting an odd value clears the memory breakpoint.\n\n");
+	printf("Input the hex value for the memory breakpoint:\t0x");
+	scanf_s("%x", &mem_brkpt);
+
+	if ((mem_brkpt % 2) != 0) {
+		breakpoints.memory = OFF;
+		printf("\n\n");
+	}
+	else if (mem_brkpt >= MAX_16_BIT_VALUE) {
+		printf("Invalid memory value, cancelling process.\n\n");
+	}
+	else {
+		breakpoints.memory = mem_brkpt;
+		printf("\n\n");
+	}
 }
 
-void clear_all_breakpoints()
+
+void set_clock_cycle_breakpoint()
 {
+	int clk_brkpt;
 
+	printf("\n\nSetting a new clock-cycle breakpoint will overwrite the previous set clock-cycle breakpoint.\n");
+	printf("Inputting a negative value clears the clock-offset breakpoint.\n\n");
+	printf("Input the integer value for the clock-offset breakpoint:\t");
+	scanf_s("%d", &clk_brkpt);
+
+	if (clk_brkpt < 0) {
+		breakpoints.clock_cycle = OFF;
+		printf("\n\n\n");
+	}
+	else {
+		breakpoints.clock_cycle = clk_brkpt;
+		breakpoints.cycle_count = 1;
+	}
 }
+
+
+void toggle_priority_change_breakpoint()
+{
+	if ((signed char)breakpoints.priority == OFF) {
+		breakpoints.priority = reg_file.PSW.PRIORITY;
+	}
+	else {
+		breakpoints.priority = OFF;
+	}
+}
+
 /* Register File Options function:
  * Displays the register file and their contents.
  * Offers the user the ability to change the contents of a register.
@@ -204,10 +295,10 @@ void reg_file_options()
 		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Register File ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 		for (i = 0; i < XMAKINA_CPU_REG_COUNT; i++) {
-			printf("R%d : 0x%04X\n", i, reg_file.REG[i].word);
+			printf("R%d : 0x%04X  (%d)\n", i, reg_file.REG[i].word, reg_file.REG[i].word);
 		}
 
-		printf("\nInput 'C' to change a value of a register, 'Q' to go back to main menu.\n");
+		printf("\nInput 'C' to change a value of a register, 'X' to clear the register file, and 'Q' to go back to main menu.\n");
 		printf("Input:\t");
 		scanf_s(" %c", &option, 1);
 		option = toupper(option);
@@ -218,6 +309,23 @@ void reg_file_options()
 		{
 		case (CHANGE_REG_VALUE):
 			change_reg_content();
+			break;
+		case (CLEAR_ALL_REGS):
+			printf("This option clears the contents in the register file. Are you sure you want to wish to continue? (Y/N)\t");
+			scanf_s(" %c", &option, 1);
+			option = toupper(option);
+
+			switch (option)
+			{
+			case ('Y'):
+				clear_all_reg_values();
+				break;
+
+			default:
+				printf("Register file clearing process has been cancelled.\n\n");
+				break;
+			}
+
 			break;
 
 		case (BACK_TO_DEBUGGER_MENU):
@@ -262,6 +370,14 @@ void change_reg_content()
 	printf("\n");
 }
 
+
+void clear_all_reg_values()
+{
+	printf("Clearing register file . . . . .  ");
+	memset(reg_file.REG, 0, sizeof(reg_file.REG));
+	printf("Register File has been successfully cleared.\n\n");
+}
+
 /* Memory menu function:
  * This sub-menu gives the user the option to view the contents of several memory locations at a time.
  * It also provides the user with the ability to change the contents of a memory locaiton. 
@@ -273,7 +389,7 @@ void memory_menu()
 	while (1) {
 		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Memory  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
-		printf("MEMORY MENU: Input your option (Input H for menu options):\t");
+		printf("Input your option (Input H for menu options):\t");
 		scanf_s(" %c", &menu_option, 1);
 		menu_option = toupper(menu_option);
 
@@ -285,9 +401,9 @@ void memory_menu()
 			top_bottom_memory_view();
 			break;
 
-		//case (BASE_AND_OFFSET_MEM_VIEW):
-		//	base_offset_memory_view();
-		//	break;
+		case (BASE_AND_OFFSET_MEM_VIEW):
+			base_offset_memory_view();
+			break;
 
 		case (CHANGE_MEM_VALUE):
 			change_mem_content();
@@ -329,7 +445,7 @@ void top_bottom_memory_view()
 		printf("Input the hex value of the upper bound address:\t0x");
 		scanf_s(" %x", &top_lim);
 
-		if (top_lim > MEM_SIZE_BYTES || top_lim < bottom_lim) {
+		if (top_lim >= MEM_SIZE_BYTES || top_lim < bottom_lim) {
 			printf("Invalid upper limit.\n");
 		}
 		else {
@@ -374,64 +490,38 @@ void change_mem_content()
 	printf("\n");
 }
 
-//void base_offset_memory_view()
-//{
-//	unsigned int base_mem_loc;
-//	int offset, i;
-//
-//	printf("\nInput the hex value of the base address:\t0x");
-//	scanf_s("%x", &base_mem_loc);
-//	getchar();
-//
-//	printf("Input the integer value of the offset:\t");
-//	scanf_s("%d", &offset);
-//	getchar();
-//
-//	if ((base_mem_loc + offset) < MEM_SIZE_BYTES) {
-//		printf("\nMemory contents from 0x%04X to 0x%04X:\n\n", base_mem_loc, (base_mem_loc + offset);
-//		for (i = bottom_lim; i <= top_lim; i++) {
-//			printf("Address: 0x%04X  ->  Contents: 0x%02X\n", i, memory.byte[i]);
-//		}
-//	}
-//}
 
-//enum SANITY_CHECK_OPTIONS { VIEW_CURRENT_SANITY_CHECK = 'S', CHANGE_SANITY_CHECK_VALUE = 'C' };
-
-void sanity_check_options()
+void base_offset_memory_view()
 {
-	char menu_option;
-	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Sanity Check Options  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
+	unsigned int base_mem_loc, bottom_lim, top_lim;
+	int offset, i;
 
-	printf("Input your option (Input H for menu options):\t");
-	scanf_s(" %c", &menu_option, 1);
-	menu_option = toupper(menu_option);
+	printf("\nInput the hex value of the base address:\t0x");
+	scanf_s("%x", &base_mem_loc);
+	getchar();
 
-	printf("\n\n");
+	printf("Input the integer value (+/-) of the offset:\t");
+	scanf_s("%d", &offset);
+	getchar();
 
-	while (1) {
-		switch (menu_option)
-		{
-		case (TOP_BOTTOM_LIMIT_MEM_VIEW):
-
-		case (BASE_AND_OFFSET_MEM_VIEW):
-
-		case (CHANGE_MEM_VALUE):
-
-		case (BACK_TO_DEBUGGER_MENU):
-			return;
-			break;
-
-		case (MENU_HELP):
-			printf("Debugger Menu options:\n");
-			printf("B = Breakpoint menu | R = Run program | Q = Quit program | F = Register File Menu\n");
-			printf("M = Memory Menu     | S = Sanity check Options           | L = Load program\n");
-			printf("Not inputting an option and pressing ENTER will step through the program.\n\n");
-			break;
-
-		default:
-			printf("Not a valid option.\n");
-			break;
+	if ((base_mem_loc + offset) < MEM_SIZE_BYTES) {
+		if ((base_mem_loc + offset) < base_mem_loc) {
+			top_lim = base_mem_loc;
+			bottom_lim = (base_mem_loc + offset);
 		}
+		else {
+			top_lim = (base_mem_loc + offset);
+			bottom_lim = base_mem_loc;
+		}
+
+		printf("\nMemory contents from 0x%04X to 0x%04X:\n\n", bottom_lim, top_lim);
+		printf("\t--------------------------\n");
+		printf("\t|  Address  |  Contents  |\n");
+		printf("\t--------------------------\n");
+		for (i = bottom_lim; i <= top_lim; i++) {
+			printf("\t|  0x%04X   |    0x%02X    |\n", i, memory.byte[i]);
+		}
+		printf("\t--------------------------\n\n");
 	}
 }
 
@@ -440,14 +530,13 @@ void sanity_check_options()
  * This allows the user to erase the contents of the XMakina memory,
  * which results in the erasure of the loaded program.
  * The user can use this feature to load a new program without needing to exit out of the emulation.
- * FUTURE WORK: Erase registers and emulation entities as well
  */
 void close_program()
 {
 	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Close Program ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	char user_response;
-	printf("This option clears the contents in the memory (does not affect register contents).\n Are you sure you want to wish to close %s? (Y/N)\t", emulation.program_name);
+	printf("This option clears the contents and properties of the current XMakina emulation.\n Are you sure you want to wish to close %s? (Y/N)\t", emulation.program_name);
 	scanf_s(" %c", &user_response, 1);
 	user_response = toupper(user_response);
 
@@ -456,8 +545,19 @@ void close_program()
 	case ('Y'):
 		printf("Closing program . . . . .  ");
 		memset(memory.byte, 0, sizeof(memory.byte));
-		emulation.program_name[0] = '\0';
+		memset(emulation.program_name, '\0', sizeof(emulation.program_name));
 		printf("Program has been successfully closed.\n\n");
+
+		clear_emulation_properties();
+
+		printf("Do you also wish to clear the register file? (Y/N)\t");
+		scanf_s(" %c", &user_response, 1);
+		user_response = toupper(user_response);
+
+		if (user_response == 'Y') {
+			clear_all_reg_values();
+		}
+
 		break;
 
 	case ('N'):
@@ -470,6 +570,7 @@ void close_program()
 	}
 }
 
+
 void test_inst_opcode()
 {
 	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Instruction Opcode testing  ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
@@ -477,10 +578,8 @@ void test_inst_opcode()
 	char user_response;
 	unsigned int inst;
 
-
 	printf("This option allows you to test a single instruction opcode.\n");
 	printf("It is a bare-bones function that WILL modify the contents in memory and in the register file.\n");
-	printf("It will also automatically enable program stepping (disabling option in the breakpoint options).\n");
 	printf("\nDo you wish to continue? (Y/N)\t");
 	scanf_s(" %c", &user_response, 1);
 	user_response = toupper(user_response);
@@ -492,7 +591,6 @@ void test_inst_opcode()
 		scanf_s("%x", &inst);
 
 		/***************************************************** Mini CPU cycle *****************************************************/
-
 		inst_set.opcode = &sys_reg.IX.word;
 		sys_reg.IX.word = inst;
 
@@ -518,8 +616,64 @@ void test_inst_opcode()
 	}
 }
 
+
 void debugger_triggers()
 {
+	if (breakpoints.memory == reg_file.PC.word) {
+		breakpoints.memory = OFF;
+		debugger_main_menu();
+	}
 
+	else if (breakpoints.clock_cycle != OFF) {
+		if (breakpoints.cycle_count >= breakpoints.clock_cycle) {
+			breakpoints.clock_cycle = OFF;
+			breakpoints.cycle_count = 0;
+			debugger_main_menu();
+		}
+		else {
+			breakpoints.cycle_count++;
+		}
+	}
+
+	else if (breakpoints.branch == ON) {
+		if (breakpoints.PC_check != (reg_file.PC.word - PC_WORD_STEP)) {
+			debugger_main_menu();
+		}
+		else {
+			breakpoints.PC_check = reg_file.PC.word;
+		}
+	}
+
+	else if ((signed char)breakpoints.priority != OFF && breakpoints.priority != reg_file.PSW.PRIORITY) {
+		debugger_main_menu();
+	}
+
+	else if (breakpoints.step == ON) {
+		debugger_main_menu();
+	}
+
+	else if (emulation.ctrl_C_detected == TRUE) {
+		printf("\n\n^C has been detected!\n\n");
+		emulation.ctrl_C_detected = FALSE;
+		debugger_main_menu();
+	}
+}
+
+
+void clear_emulation_properties()
+{
+	emulation.program_name[0] = '\0';
+	emulation.system_status = ON;
+	emulation.sys_clk = 0;
+	emulation.run_clk = 0;
+	emulation.ctrl_C_detected = FALSE;
+
+	breakpoints.branch = OFF;
+	breakpoints.PC_check = 0;
+	breakpoints.clock_cycle = OFF;
+	breakpoints.cycle_count = 0;
+	breakpoints.memory = OFF;
+	breakpoints.priority = OFF;
+	breakpoints.step = OFF;
 }
 
