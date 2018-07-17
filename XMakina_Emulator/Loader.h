@@ -1,12 +1,13 @@
 /*
-* X-Makina Emulator Project - Loader.h
-* Loader header contains all the function prototypes and definitions that the loader program utilizes
-*
-* Programmer: Manuel Burnay
-*
-*
-* Date created: 26/06/2018
-*/
+ * X-Makina Emulator Project - Loader.h
+ * Loader header contains all the function prototypes and definitions that the loader program utilizes
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 26/06/2018
+ */
 
 #include "XMakina_Emulator_entities.h"
 

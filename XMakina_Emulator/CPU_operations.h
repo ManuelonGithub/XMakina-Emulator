@@ -5,6 +5,7 @@
  *
  * Programmer: Manuel Burnay
  *
+ *  Rev 1.0: Instructions work as intended and have been properly documented.
  *
  * Date created: 30/06/2018
  */
@@ -21,9 +22,9 @@
 
 #define INST_CATEGORY(INST) ((INST & 0xC000) >> 14)
 
-#define IX_BRANCH_SIG (sys_reg.IX.bits.multi_purporse >> 2)
-#define IX_MEM_ACCESS_REG_INIT_INST_CODE sys_reg.IX.bits.multi_purporse
-#define REG_INIT_INST_CODE_START 2
+#define IX_BRANCH_SIG (sys_reg.IX.bits.multi_purporse >> 2)					// In order to not overcomplicate the structure, the bit structure in IX had a generalized space defined as multi-purpose bits.
+#define IX_MEM_ACCESS_REG_INIT_INST_CODE sys_reg.IX.bits.multi_purporse		// This is due to these being able to both represent the inst. code of a memory acces/reg init instruction
+#define REG_INIT_INST_CODE_START 2											// and also the branching bit signature.
 #define SINGLE_REG_INST_CODE_LIMIT 3
 #define TWO_OP_INST_CODE_LIMIT 12
 
@@ -78,7 +79,7 @@ extern char (*register_initialization_execution[]) (char, unsigned short);
 extern char (*direct_memory_access_execution[]) (char, char, char, char);
 extern char (*relative_memory_access_execution[]) (signed short, char, char, char);
 extern char (*single_register_execution[]) (char, char);
-char(*two_operand_execution[]) (char, char, char, char);;
+extern char (*two_operand_execution[]) (char, char, char, char);
 
 void CPU_cycle();
 void fetch();

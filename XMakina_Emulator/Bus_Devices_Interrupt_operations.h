@@ -4,6 +4,8 @@
  *
  * Programmer: Manuel Burnay
  *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
  * Date created: 10/07/2018
  */
 
@@ -30,7 +32,7 @@ extern Emulation_properties emulation;
 extern XMakina_register_file reg_file;
 
 /* Device data queue:
- * This structure is use to efficiently manage when to read the input device file,
+ * This structure is used to efficiently manage when to read the input device file,
  * after the device initialization has been made.
  */
 typedef struct input_device_data_queue {
@@ -40,14 +42,28 @@ typedef struct input_device_data_queue {
 	unsigned char data;
 } input_device_data_queue;
 
-/* Interrupt queue:
- * Current work in progress.
- * It holds pertinent data related to which interrupt vectors are queued to be serviced
+typedef struct device_interrupt_vector {
+	union {
+		unsigned short * word[2];
+		struct {
+			PSW_reg_format * INT_PSW;
+			register_format * INT_PC;
+		};
+	};
+} device_interrupt_vector;
+
+/* Emulated device structure:
+ * Using this structure for emualted devices allows for the system to efficiently
+ * keep track and address all the properties of a device.
+ * The interrupt vector structure allows the access to the device's interrupt vector memory space,
+ * and the device port pointer allows the access to the device's port in the XMakina memory
  */
-typedef struct Emulation_interrupt_queue {
-	char current_INT_vector;
-	char priority[DEVICE_NUMBER_SUPPORTED];
-} Emulation_interrupt_queue;
+typedef struct Emulated_device {
+	device_interrupt_vector int_vector;
+	Device_port * dev_port;
+	int proc_time;
+	int time_left;
+} Emulated_device;
 
 void device_init();
 void device_management();

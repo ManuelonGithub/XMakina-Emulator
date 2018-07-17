@@ -15,8 +15,6 @@
 #define HIGH_BYTE_SHIFT(x) (x*(1 << 8))
 #define LOW_BYTE_MASK 0x00FF
 #define HIGH_BYTE_MASK 0xFF00
-//#define LOW_BYTE_OVERWRITE(dst, value) ((dst & HIGH_BYTE_MASK) | (value & LOW_BYTE_MASK))
-//#define HIGH_BYTE_OVERWRITE(dst, value) ((dst & LOW_BYTE_MASK) | (value & HIGH_BYTE_MASK))
 #define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
 #define BIT_CHECK(src, bit) ((src >> bit) & 1)
 #define WORD_MSBi 15
@@ -130,21 +128,21 @@ typedef struct Emulation_properties {
 	unsigned char ctrl_C_detected;
 } Emulation_properties;
 
-typedef struct device_interrupt_vector {
-	union {
-		unsigned short * word[2];
-		struct {
-			PSW_reg_format * INT_PSW;
-			register_format * INT_PC;
-		};
-	};
-} device_interrupt_vector;
-
-typedef struct Emulated_device {
-	device_interrupt_vector int_vector;
-	Device_port * dev_port;
-	int proc_time;
-	int time_left;
-} Emulated_device;
+//typedef struct device_interrupt_vector {
+//	union {
+//		unsigned short * word[2];
+//		struct {
+//			PSW_reg_format * INT_PSW;
+//			register_format * INT_PC;
+//		};
+//	};
+//} device_interrupt_vector;
+//
+//typedef struct Emulated_device {
+//	device_interrupt_vector int_vector;
+//	Device_port * dev_port;
+//	int proc_time;
+//	int time_left;
+//} Emulated_device;
 
 #endif // !XMAKINA_EMULATOR_ENTITIES_H

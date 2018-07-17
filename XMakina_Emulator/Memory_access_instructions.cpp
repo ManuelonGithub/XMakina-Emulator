@@ -1,3 +1,17 @@
+/*
+ * X-Makina Emulator Project - Memory_access_instructions.cpp
+ * Contains all the function prototypes and definitions used when the CPU cycle is executing a Memory access instruction
+ *
+ * In order to keep the files at a minimum, while keeping everything organized,
+ * Both direct and relative memory addressing are covered in this file.
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 10/07/2018
+ */
+
 #include "stdafx.h"
 #include "Memory_access_instructions.h"
 #include "Bus_Devices_Interrupt_operations.h"
@@ -6,6 +20,8 @@ char (*direct_memory_access_execution[]) (char, char, char, char) = { LD, ST };
 char (*relative_memory_access_execution[]) (signed short, char, char, char) = { LDR, STR };
 
 /************************ Direct Memory Accessing *********************/
+
+
 char LD(char action, char word_byte_control, char src_reg, char dst_reg)
 {
 	printf("Executing a LD instruction.\n");

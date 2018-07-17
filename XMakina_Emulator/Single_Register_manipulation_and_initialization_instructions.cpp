@@ -38,21 +38,21 @@ char SRA(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SRA instruction.\n");
 
-	register_format temp_res = reg_file.REG[dst_reg];
+	sys_reg.temp_reg = reg_file.REG[dst_reg];
 
 	if (word_byte_control == WORD) {
-		SINGLE_RIGHT_SHIFT(temp_res.word);
-		BIT_CHANGE(temp_res.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.word);
+		BIT_CHANGE(sys_reg.temp_reg.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
 	}
 	else {
-		SINGLE_RIGHT_SHIFT(temp_res.LSB);
-		BIT_CHANGE(temp_res.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.LSB);
+		BIT_CHANGE(sys_reg.temp_reg.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
 	}
 	
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, temp_res.word, word_byte_control);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg.word, word_byte_control);
 	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);
 
-	reg_file.REG[dst_reg] = temp_res;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg;
 
 	return PROCESS_SUCCESS;
 }
@@ -61,21 +61,21 @@ char RRC(char word_byte_control, char dst_reg)
 {
 	printf("Executing a RRC instruction.\n");
 
-	register_format temp_res = reg_file.REG[dst_reg];
+	sys_reg.temp_reg = reg_file.REG[dst_reg];
 
 	if (word_byte_control == WORD) {
-		SINGLE_RIGHT_SHIFT(temp_res.word);
-		BIT_CHANGE(temp_res.word, WORD_MSBi, reg_file.PSW.C);
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.word);
+		BIT_CHANGE(sys_reg.temp_reg.word, WORD_MSBi, reg_file.PSW.C);
 	}
 	else {
-		SINGLE_RIGHT_SHIFT(temp_res.LSB);
-		BIT_CHANGE(temp_res.LSB, BYTE_MSBi, reg_file.PSW.C);
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.LSB);
+		BIT_CHANGE(sys_reg.temp_reg.LSB, BYTE_MSBi, reg_file.PSW.C);
 	}
 
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, temp_res.word, word_byte_control);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg.word, word_byte_control);
 	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);
 
-	reg_file.REG[dst_reg] = temp_res;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg;
 
 	return PROCESS_SUCCESS;
 }
@@ -84,10 +84,10 @@ char SWPB(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SWPB instruction.\n");
 
-	register_format temp_res = reg_file.REG[dst_reg];
+	sys_reg.temp_reg = reg_file.REG[dst_reg];
 
-	reg_file.REG[dst_reg].MSB = temp_res.LSB;
-	reg_file.REG[dst_reg].LSB = temp_res.MSB;
+	reg_file.REG[dst_reg].MSB = sys_reg.temp_reg.LSB;
+	reg_file.REG[dst_reg].LSB = sys_reg.temp_reg.MSB;
 	
 	return PROCESS_SUCCESS;
 }
@@ -107,13 +107,13 @@ char SXT(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SXT instruction.\n");
 
-	register_format temp_res = reg_file.REG[dst_reg];
+	sys_reg.temp_reg = reg_file.REG[dst_reg];
 
-	temp_res.MSB = (LOW_BYTE_MASK & BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi));
+	sys_reg.temp_reg.MSB = (LOW_BYTE_MASK & BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi));
 	
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, temp_res.word, word_byte_control);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg.word, word_byte_control);
 
-	reg_file.REG[dst_reg] = temp_res;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg;
 
 	return PROCESS_SUCCESS;
 }

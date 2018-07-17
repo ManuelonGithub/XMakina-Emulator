@@ -1,11 +1,13 @@
 /*
-* X-Makina Emulator Project - Bus_Devices_Interrupt_operations.cpp
-* Contains all the functions related to the bus, devices, and interrupt handling.
-*
-* Programmer: Manuel Burnay
-*
-* Date created: 10/07/2018
-*/
+ * X-Makina Emulator Project - Bus_Devices_Interrupt_operations.cpp
+ * Contains all the functions related to the bus, devices, and interrupt handling.
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 10/07/2018
+ */
 
 #include "stdafx.h"
 #include "Bus_Devices_Interrupt_operations.h"
@@ -25,12 +27,12 @@ char interrupt_queue[DEVICE_NUMBER_SUPPORTED];
  */
 void bus(char word_byte_control, char read_write_control)
 {
-	emulation.current_cycle_status = NORMAL_MEM_ACCESS;
+	emulation.current_cycle_status = NORMAL_MEM_ACCESS;		// Initialize the emulation flag as to keep the behaviour of the function predictable.
 
 	if (sys_reg.MAR < DEVICE_MEMORY_SPACE) {
-		emulation.current_cycle_status = device_memory_access(word_byte_control, read_write_control);
-	}
-
+		emulation.current_cycle_status = device_memory_access(word_byte_control, read_write_control);	// Because the user can be attempting reading/writing data to the device memory space
+	}																									// without wanting to initiate a device data transfer process, 
+																										// So the system must keep track of this in order to keep the code efficient.
 	if (emulation.current_cycle_status == NORMAL_MEM_ACCESS) {
 		if (read_write_control == READ) {
 			sys_reg.MBR = (word_byte_control == WORD) ? memory.word[WORD_ADDR_CONV(sys_reg.MAR)] : memory.byte[sys_reg.MAR];
@@ -57,7 +59,7 @@ char device_memory_access(char word_byte_control, char read_write_control)
 {
 	unsigned char dev_num = WORD_ADDR_CONV(sys_reg.MAR);
 
-	if (sys_reg.MAR % 2 == 1) {
+	if (sys_reg.MAR % 2 == 1) {					// This operation determines if the MAR address is odd 
 		switch (device[dev_num].dev_port->I_O)
 		{
 		case (INPUT):
@@ -67,9 +69,9 @@ char device_memory_access(char word_byte_control, char read_write_control)
 				return DEVICE_MEM_ACCESS;
 			}
 			else {
-				return NORMAL_MEM_ACCESS;
-			}
-			break;
+				return NORMAL_MEM_ACCESS;	// In order to satisfy the instruction of the user, 
+			}								// even if it was determined that it an invalid attempt of starting a device data transfer process,
+			break;							// The system will still follow through with the memory access instruction.
 
 		case (OUTPUT):
 			if (read_write_control == WRITE) {
@@ -83,7 +85,7 @@ char device_memory_access(char word_byte_control, char read_write_control)
 				return DEVICE_MEM_ACCESS;
 			}
 			else {
-				return NORMAL_MEM_ACCESS;
+				return NORMAL_MEM_ACCESS;	// What was said above (line 70) applies here as well.
 			}
 			break;
 
@@ -149,7 +151,7 @@ void device_init()
  * It handles data communication between XMakina and devices,
  * by reading the input device file, and managing the data insertion from the input devies,
  * to the appropriate memory location at the appropriate time,
- * or managing the data processing times of the output devices. <--- TODO
+ * or managing the data processing times of the output devices
  */
 void device_management()
 {
@@ -177,7 +179,13 @@ void device_management()
 	}
 }
 
-
+/* Input device data process function:
+ * Function gets called when the device management function determines 
+ * that an input device is sending data to the machine.
+ * It goes through the process of how an input device would interact with the machine,
+ * properly setting the DBA and OV bits when needed,
+ * and tiggering of the interrupt handler when appropriate.
+ */
 void input_device_data_process(unsigned char dev_num, unsigned char data)
 {
 	if (device[dev_num].dev_port->I_O != INPUT) {
@@ -190,6 +198,7 @@ void input_device_data_process(unsigned char dev_num, unsigned char data)
 	}
 	else {
 		device[dev_num].dev_port->OV = ENABLED;
+		fprintf(device_output_file, "Machine has failed to read the char %c from input device %d. This data has been overrun on clock %d.\n", device[dev_num].dev_port->data, dev_num, emulation.sys_clk);
 	}
 
 	device[dev_num].dev_port->data = data;
@@ -199,17 +208,47 @@ void input_device_data_process(unsigned char dev_num, unsigned char data)
 	}
 }
 
-
+/* Output device data process function:
+ * Function gets called when the device management function determines
+ * that an output device is receiving data to the machine.
+ * It goes through the process of how an output device would interact with the machine,
+ * properly setting the DBA and OV bits when needed and the device processing time,
+ * and tiggering of the interrupt handler when appropriate.
+ */
 void output_device_data_process(unsigned char dev_num)
 {
 	device[dev_num].time_left -= emulation.run_clk;
 
+	if (device[dev_num].dev_port->OV == ENABLED) {
+		fprintf(device_output_file, "Output device %d has detected a data overrun on clock %d\n", dev_num, emulation.sys_clk);
+		device[dev_num].dev_port->OV = DISABLED;
+	}
 	if (device[dev_num].time_left <= 0) {
-		fprintf(device_output_file, "Device %d has recieved the char %c on clock %d\n", dev_num, device[dev_num].dev_port->data, emulation.sys_clk);
+		fprintf(device_output_file, "Output device %d has recieved the char %c on clock %d\n", dev_num, device[dev_num].dev_port->data, emulation.sys_clk);
 		device[dev_num].dev_port->DBA = ENABLED;
+
+		if (device[dev_num].dev_port->IE = ENABLED) {
+			interrupt_handling_process(dev_num);
+		}
 	}
 }
 
+/* Interrupt handling process function:
+ * Function goes through the process that occurs when a device triggers an interrupt.
+ * It analyzes the current program priority, and manages the interrupt trigger accordingly,
+ * by either queueing it, or transfering control to the interrupt vector.
+ * 
+ * NOTES:
+ * 1) Interrupt queue is set a simple 8 element char array.
+ *	  Each element represents a device interrupt vector, and the content of the element
+ *    signal the system that the interrupt vector isn't queued (if the content value = INT_OFF (-1))
+ *    or if it is queued, the value is the priority value of the interrupt vector.
+ *
+ * 2) The current emulated interrupt process contains elements of XMakina v2, 
+ *	  where 3 bits of the PSW's reserved bits are now used to save the priority of the previous PSW
+ *    that was pushed to the stack when a new interrupt vector is being serviced.
+ *	  This allows the process to be far less expensive when returning from an ISR.
+ */
 void interrupt_handling_process(unsigned char dev_num)
 {
 	if (device[dev_num].int_vector.INT_PSW->PRIORITY <= reg_file.PSW.PRIORITY) {
@@ -231,18 +270,29 @@ void interrupt_handling_process(unsigned char dev_num)
 	}
 }
 
+/* Interrupt return process function:
+ * This function handles the process of returning from an interrupt vector.
+ * First it analyses the interrupt queue to see if there's an interrupt vector
+ * with higher priority than the previous PSW priority.
+ * As mentioned above, this functionality was taken from XMakina v2,
+ * where the PSW now stores the priority value of the previous PSW that was pushed to the stack,
+ * so the process of returning from an interrupt doesn't require a heavy access to memory, which is expensive.
+ * If an interrupt in the queue doesn't match the criteria, then the process will pull LR, PSW, and PC from the stack,
+ * as it was determined to be the machine status with highest priority.
+ */
 void interrupt_return_process()
 {
 	int i;
 	unsigned char dev_num = LOW_BYTE_MASK;	// Distinct initialization so the process can easily determine if variable hasn't been modifed.
 
 	for (i = 0; i < DEVICE_NUMBER_SUPPORTED; i++) {
-		if (interrupt_queue[i] > reg_file.PSW.prev_PRIORITY) {
-			dev_num = i;
+		if (interrupt_queue[i] > reg_file.PSW.prev_PRIORITY) {	// Because the interrupt queue is a signed char data type,
+			dev_num = i;										// it registers INT_OFF as -1, so it will always be lower than any priority value.
 		}
 	}
 
 	if (dev_num != LOW_BYTE_MASK) {
+		interrupt_queue[dev_num] = INT_OFF;		// When an interrupt is serviced, its spot in the queue is cleared.
 		interrupt_handling_process(dev_num);
 	}
 	else {
@@ -253,6 +303,13 @@ void interrupt_return_process()
 	}
 }
 
+/* Push function:
+ * Exact same functionality as ST Reg,-SP.
+ * But using that instruction would cause conflicts when attempting to include the header of that file,
+ * since memory_access_instruction.cpp already has Bus_Devices_Interrupt_operations.h as a dependacy.
+ * Remaking this function allows the code above to be more organized and readible,
+ * since it now follows the process laid out in XMakina's ISA with the same language (Push and Pull).
+ */
 void push(unsigned short * reg)
 {
 	reg_file.SP.word -= WORD_STEP;
@@ -261,6 +318,13 @@ void push(unsigned short * reg)
 	bus(WORD, WRITE);
 }
 
+/* Pull function:
+* Exact same functionality as LD +SP,Reg.
+* But using that instruction would cause conflicts when attempting to include the header of that file,
+* since memory_access_instruction.cpp already has Bus_Devices_Interrupt_operations.h as a dependacy.
+* Remaking this function allows the code above to be more organized and readible,
+* since it now follows the process laid out in XMakina's ISA with the same language (Push and Pull).
+*/
 void pull(unsigned short * reg)
 {
 	sys_reg.MAR = reg_file.SP.word;

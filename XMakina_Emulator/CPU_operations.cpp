@@ -5,6 +5,7 @@
  *
  * Programmer: Manuel Burnay
  *
+ *  Rev 1.0: Instructions work as intended and have been properly documented.
  *
  * Date created: 30/06/2018
  */
@@ -24,7 +25,15 @@ XMakina_instruction_set inst_set;
  * This also is used to notify the user of a problem within the program, or perhaps of the emulation.
  */
 
-
+/* CPU cycle function:
+ * Function encompasses the standard cpu cycle of fetch -> decode -> execute.
+ * It calls the separate functions accordingly, and performs a check after each step
+ * to make sure an invalid instruction doesn't go further through the cycle then it needs to.
+ * 
+ * NOTES:
+ * For this particular emulation, each step of the process took one clock cycle to perform.
+ * This is just a particular aspect of the emulation, it does not change how the system behaves otherwise.
+ */
 void CPU_cycle()
 {
 	inst_set.opcode = &sys_reg.IX.word;
@@ -77,8 +86,6 @@ void fetch()
 	bus(WORD, READ);
 	sys_reg.IX.word = sys_reg.MBR;
 	reg_file.PC.word += WORD_STEP;
-
-	//emulation.sys_clk += NORMAL_OP_CLK_INC;
 
 	emulation.current_cycle_status = PROCESS_SUCCESS;
 }

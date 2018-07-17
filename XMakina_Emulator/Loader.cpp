@@ -4,6 +4,7 @@
  *
  * Programmer: Manuel Burnay
  *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
  *
  * Date created: 26/06/2018
  */

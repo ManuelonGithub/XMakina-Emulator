@@ -1,3 +1,16 @@
+/*
+ * X-Makina Emulator Project - Memory_access_instructions.h
+ * Contains all the function prototypes and definitions used when the CPU cycle is executing a Memory access instruction
+ *
+ * In order to keep the files at a minimum, while keeping everything organized,
+ * Both direct and relative memory addressing are covered in this file.
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 10/07/2018
+ */
 
 #include "XMakina_Emulator_entities.h"
 
@@ -10,8 +23,6 @@ enum DIRECT_MEMORY_ACCESS_ACTION { NO_ACTION, POST_INCREMEMT, POST_DECREMENT, PR
 extern XMakina_memory memory;
 extern XMakina_register_file reg_file;
 extern System_registers sys_reg;
-//extern Emulation_properties emulation;
-
 
 /* Direct memory access intruction:
  *		- "Destination Register": 3 bits used to determine the destination register used in the execution.

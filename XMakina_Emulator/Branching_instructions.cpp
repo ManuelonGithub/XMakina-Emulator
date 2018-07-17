@@ -1,22 +1,30 @@
 /*
-* X-Makina Emulator Project - Branching_instructions.cpp
-* Contains all the function used when the CPU cycle is executing a Branching instruction
-*
-* In order to keep the files at a minimum, while keeping everything organized,
-* Branching with link and conditional branching are both covered in this file.
-*
-* Programmer: Manuel Burnay
-*
-* Rev 1.0: Instructions work as intended and have been properly documented.
-*
-* Date created: 10/07/2018
-*/
+ * X-Makina Emulator Project - Branching_instructions.cpp
+ * Contains all the function used when the CPU cycle is executing a Branching instruction
+ *
+ * In order to keep the files at a minimum, while keeping everything organized,
+ * Branching with link and conditional branching are both covered in this file.
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 10/07/2018
+ */
 
 
 #include "stdafx.h"
 #include "Branching_instructions.h"
 
 char (*conditional_branching_execution[]) (signed short) = { BEQ_BZ, BNE_BNZ, BC_BHS, BNC_BLO, BN, BGE, BLT, BAL };
+
+/* NOTE:
+ * The sign extension operation isn't present in the emulation because because it wasn't needed.
+ * When passing the value of the offset (an unsigned short defined with either 10 or 13 bits) to a signed short argument,
+ * the sign of the offset was made to extend to the 16-bits of the signed entity "label" by default.
+ * So simply passing the offset by value (after it has been converted from a memory word space to memory byte space),
+ * the sign extension step is completed.
+ */
 
 /****************** Branching with Link Instruction ******************/
 
