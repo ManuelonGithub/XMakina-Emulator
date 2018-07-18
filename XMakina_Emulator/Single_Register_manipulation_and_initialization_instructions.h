@@ -1,3 +1,17 @@
+/*
+ * X-Makina Emulator Project - Single_Register_manipulation_and_initialization_instructions.h
+ * Contains all the function prototypes and definitions used when the CPU cycle is executing 
+ * either a single register instruction or a register initialization instruction.
+ *
+ * In order to keep the files at a minimum, while keeping everything organized,
+ * Both single register and register initialization instructions are covered in this file.
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 10/07/2018
+ */
 
 #include "XMakina_Emulator_entities.h"
 
@@ -8,20 +22,19 @@
 
 #define SINGLE_RIGHT_SHIFT(value) (value >>= 1)
 
-
 extern XMakina_register_file reg_file;
 
 /* Single Register intruction:
-*		- "Destination Register": 3 bits used to determine the destination register used in the execution.
-*		- "Word-Byte control": Signals the process to either address the whole word of the operands, or just the Low Byte
-*		- "Instruction Category signature": Bit that allows the decoding circuitry to
-*			distinguish between instruction types that share the same instruction category.
-*		- "Intruction code": Bit(s) that allows the decode/execution circuitry
-*			to distinguish between instructions within the same instrucition type
-*		- Instruction category: The two MSBi's of the instruction opcode.
-*			Instructions within the same category don't necessarely share anything in common,
-*			it's just a way to efficiently decode the instruction opcode.
-*/
+ *		- "Destination Register": 3 bits used to determine the destination register used in the execution.
+ *		- "Word-Byte control": Signals the process to either address the whole word of the operands, or just the Low Byte
+ *		- "Instruction Category signature": Bit that allows the decoding circuitry to
+ *			distinguish between instruction types that share the same instruction category.
+ *		- "Intruction code": Bit(s) that allows the decode/execution circuitry
+ *			to distinguish between instructions within the same instrucition type
+ *		- Instruction category: The two MSBi's of the instruction opcode.
+ *			Instructions within the same category don't necessarely share anything in common,
+ *			it's just a way to efficiently decode the instruction opcode.
+ */
 typedef struct single_register_instruction {
 	unsigned short dst_reg : 3;
 	unsigned short unused_bits_0 : 3;		// Bit(s) that aren't used to describe any relevant information in the instruction opcode
@@ -34,23 +47,22 @@ typedef struct single_register_instruction {
 } single_register_instruction;
 
 
-/* Single Register intruction:
-*		- "Destination Register": 3 bits used to determine the destination register used in the execution.
-*		- "Value": Unique to register initialization. It's a byte value that will written to the destination, 
-*			in the manner described by what the instruction code represents
-*		- "Intruction code": Bit(s) that allows the decode/execution circuitry
-*			to distinguish between instructions within the same instrucition type
-*		- Instruction category: The two MSBi's of the instruction opcode.
-*			Instructions within the same category don't necessarely share anything in common,
-*			it's just a way to efficiently decode the instruction opcode.
-*/
+/* Register Initialization intruction:
+ *		- "Destination Register": 3 bits used to determine the destination register used in the execution.
+ *		- "Value": Unique to register initialization. It's a byte value that will written to the destination, 
+ *			in the manner described by what the instruction code represents
+ *		- "Intruction code": Bit(s) that allows the decode/execution circuitry
+ *			to distinguish between instructions within the same instrucition type
+ *		- Instruction category: The two MSBi's of the instruction opcode.
+ *			Instructions within the same category don't necessarely share anything in common,
+ *			it's just a way to efficiently decode the instruction opcode.
+ */
 typedef struct register_initialization_instruction {
 	unsigned short dst_reg : 3;
 	unsigned short value : 8;
 	unsigned short inst_code : 3;
 	unsigned short inst_category : 2;
 } register_initialization_instruction;
-
 
 
 char MOVL(char dst_reg, unsigned short value);
