@@ -73,6 +73,9 @@ int s_record_decoder(char * s_record)
 	 * This value also indicates the starting address if the record is type 9,
 	 * and is used when retrieving the program name for type 0 records, since it will always be 0 for that record type.
 	 * The initialization is split in two parts so the data retrieved can be easily added to the validation sum.
+	 *
+	 * NOTE:
+	 * HIGH_BYTE_SHIFT, LAST_WORD and LOW_BYTE_MASK are defined in XMakina_Emulator_entities.h
 	 */
 	sscanf_s(&s_record[4], "%2x", &data);	// "Loading" the address high-byte
 	loaded_address = HIGH_BYTE_SHIFT(data);	// This multiplication is equivalent to a left byte shift.

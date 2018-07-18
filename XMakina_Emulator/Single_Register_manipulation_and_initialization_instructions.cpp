@@ -1,17 +1,19 @@
 /*
-* X-Makina Emulator Project - Single_Register_manipulation_and_initialization_instructions.cpp
-* Contains all the functions used when the CPU cycle is executing
-* either a single register instruction or a register initialization instruction.
-*
-* In order to keep the files at a minimum, while keeping everything organized,
-* Both single register and register initialization instructions are covered in this file.
-*
-* Programmer: Manuel Burnay
-*
-* Rev 1.0: Instructions work as intended and have been properly documented.
-*
-* Date created: 10/07/2018
-*/
+ * X-Makina Emulator Project - Single_Register_manipulation_and_initialization_instructions.cpp
+ * Contains all the functions used when the CPU cycle is executing
+ * either a single register instruction or a register initialization instruction.
+ *
+ * In order to keep the files at a minimum, while keeping everything organized,
+ * Both single register and register initialization instructions are covered in this file.
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 10/07/2018
+ *
+ * General file note: Unless specified, any definitions/macros should be found the file's respective header.
+ */
 
 #include "stdafx.h"
 #include "Single_Register_manipulation_and_initialization_instructions.h"
@@ -20,6 +22,7 @@
 char (*register_initialization_execution[]) (char, unsigned short) = { MOVL, MOVLZ, MOVH };
 char (*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
 
+// NOTE: PROCESS_SUCCESS is defined in XMakina_Emulator_entities.h
 
 /*********************** Register Initialization **********************/
 
@@ -64,60 +67,88 @@ char MOVH(char dst_reg, unsigned short value)
 
 
 /*********************** Single Register Manipulation *****************/
+
+/* Shift Right Arithmetic function:
+ * Function shifts the word or LSB of the destination register arrithmetically.
+ * That means that the sign of the number (bit 15 or 7) is perserved, 
+ * and the LSBi goes to the carry flag.
+ * This effectively divides the number by 2, 
+ * and performing the instruction of the same value enough times with result on the value being either 0 or -1.
+ * SRA instruction affects the PSW using the update_PSW function algorithm,
+ * using the initial value of the destination register as both the source and destination register.
+ * 
+ * NOTE:
+ * BIT_CHANGE, WORD_MSBi, BYTE_MSBi, LSBi and BIT_CHECK are defined in XMakina_Emulator_entities.h
+ */
 char SRA(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SRA instruction.\n");
 
-	sys_reg.temp_reg = reg_file.REG[dst_reg];
+	sys_reg.temp_reg_a = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
 
 	if (word_byte_control == WORD) {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.word);
-		BIT_CHANGE(sys_reg.temp_reg.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.word);
+		BIT_CHANGE(sys_reg.temp_reg_a.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
 	}
 	else {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.LSB);
-		BIT_CHANGE(sys_reg.temp_reg.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.LSB);
+		BIT_CHANGE(sys_reg.temp_reg_a.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
 	}
 	
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg.word, word_byte_control);
-	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_control);
+	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);	// Update_PSW does not transfer the dst_reg's LSB to the PSW.C, so must be done here
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
 
 	return PROCESS_SUCCESS;
 }
 
+/* Rotate Right through Carry function:
+ * Function shifts the word or LSB of the destination register, 
+ * transfering the value of the carry to the MSBi of the operation, 
+ * and the value of the LSBi is tranfered to the carry.
+ * SRA instruction affects the PSW using the update_PSW function algorithm,
+ * using the initial value of the destination register as both the source and destination register.
+ *
+ * NOTE:
+ * BIT_CHANGE, WORD_MSBi, BYTE_MSBi, LSBi and BIT_CHECK are defined in XMakina_Emulator_entities.h
+ */
 char RRC(char word_byte_control, char dst_reg)
 {
 	printf("Executing a RRC instruction.\n");
 
-	sys_reg.temp_reg = reg_file.REG[dst_reg];
+	sys_reg.temp_reg_a = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
 
 	if (word_byte_control == WORD) {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.word);
-		BIT_CHANGE(sys_reg.temp_reg.word, WORD_MSBi, reg_file.PSW.C);
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.word);
+		BIT_CHANGE(sys_reg.temp_reg_a.word, WORD_MSBi, reg_file.PSW.C);
 	}
 	else {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg.LSB);
-		BIT_CHANGE(sys_reg.temp_reg.LSB, BYTE_MSBi, reg_file.PSW.C);
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.LSB);
+		BIT_CHANGE(sys_reg.temp_reg_a.LSB, BYTE_MSBi, reg_file.PSW.C);
 	}
 
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg.word, word_byte_control);
-	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_control);
+	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);	// Update_PSW does not transfer the dst_reg's LSB to the PSW.C, so must be done here
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
 
 	return PROCESS_SUCCESS;
 }
 
+/* Swap bytes function:
+ * Function swaps the MSB and LSB of the destination register.
+ * This version uses the system's hidden temporary register.
+ * It has no effect on the PSW.
+ */
 char SWPB(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SWPB instruction.\n");
 
-	sys_reg.temp_reg = reg_file.REG[dst_reg];
+	sys_reg.temp_reg_a = reg_file.REG[dst_reg];
 
-	reg_file.REG[dst_reg].MSB = sys_reg.temp_reg.LSB;
-	reg_file.REG[dst_reg].LSB = sys_reg.temp_reg.MSB;
+	reg_file.REG[dst_reg].MSB = sys_reg.temp_reg_a.LSB;
+	reg_file.REG[dst_reg].LSB = sys_reg.temp_reg_a.MSB;
 	
 	return PROCESS_SUCCESS;
 }
@@ -133,16 +164,24 @@ char SWPB(char word_byte_control, char dst_reg)
 //	return PROCESS_SUCCESS;
 //}
 
+/* Sign extension function:
+ * Function extends the sign bit of the register's LSB to the whole word.
+ * SXT instruction affects the PSW using the update_PSW function algorithm,
+ * using the initial value of the destination register as both the source and destination register.
+ *
+ * NOTE:
+ * BIT_CHECK, BYTE_MSBi and LOW_BYTE_MASK are defined in XMakina_Emulator_entities.h
+ */
 char SXT(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SXT instruction.\n");
 
-	sys_reg.temp_reg = reg_file.REG[dst_reg];
-	sys_reg.temp_reg.MSB = (LOW_BYTE_MASK & BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi));	// This performs an and between 0xFF and the sign bit of the register's LSB,
-																								// causing the result to be 0 if the sign bit is 0, and 1 if the sign bit is 1
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg.word, word_byte_control);
+	sys_reg.temp_reg_a = reg_file.REG[dst_reg];															// BIT_CHECK retreives bit 7's value of destination register
+	sys_reg.temp_reg_a.MSB = (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi) == 1) ? LOW_BYTE_MASK : 0;	// LOW_BYTE_MASK = 0xFF, so if bit 7 = 1 (negative #), MSB = 0xFF, otherwise MSB = 0;
+																										
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_control);
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
 
 	return PROCESS_SUCCESS;
 }

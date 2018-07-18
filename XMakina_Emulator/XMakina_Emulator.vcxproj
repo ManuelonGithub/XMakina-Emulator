@@ -161,7 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Branching_instructions.cpp" />
-    <ClCompile Include="Bus_and_Device_operations.cpp" />
+    <ClCompile Include="Bus_Devices_Interrupt_operations.cpp" />
     <ClCompile Include="CPU_operations.cpp" />
     <ClCompile Include="debugger.cpp" />
     <ClCompile Include="Loader.cpp" />

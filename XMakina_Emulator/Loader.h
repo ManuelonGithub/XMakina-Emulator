@@ -15,8 +15,8 @@
 #ifndef LOADER_H
 #define LOADER_H
 
-#define S_RECORD_MAX_SIZE 510			// this value comes from the S-record documentation, where it states that it can assumed that an S-Record will not exceed 510 characters
-#define DATA_POS 8
+#define S_RECORD_MAX_SIZE 510	// this value comes from the S-record documentation, where it states that it can assumed that an S-Record will not exceed 510 characters
+#define DATA_POS 8				// this value is used to skip over the first 8 characters of the s-record that specify the record type, pair count, and record's starting address
 
 enum RECORD_VALIDATION_CODES { VALID_RECORD = 1, CHECKSUM_ERROR = -1, S_RECORD_ERROR = -2};
 

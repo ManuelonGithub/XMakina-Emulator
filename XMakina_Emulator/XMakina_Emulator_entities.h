@@ -1,21 +1,32 @@
 /*
-* X-Makina Emulator Project - XMakina_entities.h
-* XMakina entities header file contains the definitions of the several components of an XMakina Machine
-*
-* Programmer: Manuel Burnay
-*
-*
-* Date created: 26/06/2018
-*/
+ * X-Makina Emulator Project - XMakina_emulator_entities.h
+ * XMakina entities header file contains the definitions of the several components of an XMakina Machine
+ *
+ * Programmer: Manuel Burnay
+ *
+ * Rev 1.0: Instructions work as intended and have been properly documented.
+ *
+ * Date created: 26/06/2018
+ */
 
 #pragma once
 #ifndef XMAKINA_EMULATOR_ENTITIES_H
 #define XMAKINA_EMULATOR_ENTITIES_H
 
-#define HIGH_BYTE_SHIFT(x) (x*(1 << 8))
+#define HIGH_BYTE_SHIFT(x) (x*(1 << 8))	// returns the value of x shfited by 8 bits
 #define LOW_BYTE_MASK 0x00FF
 #define HIGH_BYTE_MASK 0xFF00
+
+/* Macro changes the bit specified by the the 'bit' position of the 'src' by the the binary number specified by the 'value'
+ * -> src[bit] = value.
+ * General macro used to set/clear any bit of the source value
+ */
 #define BIT_CHANGE(src, bit, value) (src ^= (-value ^ src) & (1 << bit))
+
+ /* Macro returns the binary value of the specific 'bit' in the 'src'
+ * -> returns src[bit]
+ * General macro used to retreive the value of any bit in the source value
+ */
 #define BIT_CHECK(src, bit) ((src >> bit) & 1)
 #define WORD_MSBi 15
 #define BYTE_MSBi 7
@@ -47,6 +58,9 @@ enum BIT_MANIP { CLEAR, SET };
 
 void update_PSW(unsigned short src, unsigned short dst, unsigned short res, unsigned char W_B_ctrl);	// The function is here due to multiple functions requiring it.
 
+/* Device port structure:
+ * speficies the bit structure of the memory word dedicated to a device port
+ */
 typedef struct Device_port {
 	union {
 		unsigned char control;
@@ -67,6 +81,9 @@ typedef union XMakina_memory {
 	Device_port dev_port[DEVICE_NUMBER_SUPPORTED];
 } XMakina_memory;
 
+/* Program Status Word register format structure:
+ * speficies the bit structure of PSW.
+ */
 typedef union PSW_reg_format {
 	unsigned short word;
 	struct {
@@ -81,6 +98,9 @@ typedef union PSW_reg_format {
 	};
 } PSW_reg_format;
 
+/* Register Format structure:
+ * speficies the structure of a general register.
+ */
 typedef union register_format {
 	unsigned short word;
 	struct {
@@ -89,6 +109,13 @@ typedef union register_format {
 	};
 } register_format;
 
+/* XMakina Register File union:
+ * Allows the emulation to easily pair an array of registers,
+ * with the specific register it represents.
+ * This allows for the emulation code to look very clean when addressing
+ * a spefic register, while at the same time not having to come up with
+ * complex solutions to figure out the register position in the register file.
+ */
 typedef union XMakina_register_file {
 	struct {
 		register_format R0, R1, R2, R3, LR, SP;
@@ -98,24 +125,49 @@ typedef union XMakina_register_file {
 	register_format REG [XMAKINA_CPU_REG_COUNT];
 } XMakina_register_file;
 
+/* Instruction Register format structure:
+ * speficies the bit structure of IX.
+ * This bit format allows for the decoding and execution process
+ * to be free of heavy bit masking and bitwise operations.
+ */
 typedef union IX_bit_format {
 	unsigned short word;
 	struct {
 		unsigned short undescriptive_0 : 8;
 		unsigned short ALU_cat_sig_bit : 1;
 		unsigned short undescriptive_1 : 2;
+
+		/* These bits contains both the instruction code of a Memory address/Reg. init. instruction
+		 * and the bit signature for the branching instructions, thus the name multi-purpose.
+		 * thus the name multi-purpose.
+		 */
 		unsigned short multi_purporse : 3;
 		unsigned short category : 2;
 	} bits;
 } IX_bit_format;
 
+/* System register structure:
+ * Contains all the registers unaddressable/hidden to the user.
+ * They are used for communication between external entities such as memory,
+ * or used in the CPU cycle to temporarely contain values to be decoded/used in operations.
+ */
 typedef struct System_registers {
 	unsigned short MAR;
 	unsigned short MBR;
 	IX_bit_format IX;
-	register_format temp_reg;
+	register_format temp_reg_a;
+	register_format temp_reg_b;
 } System_registers;
 
+/* Emulation properties structure:
+ * Contains properties related to the emulation run,
+ * such as the system/run clocks, the current program name, the system status,
+ * which is altered by the debugger to indicate that the user wishes to exit the emulation.
+ * Current cycle status/instruction type is used by the CPU cycle to:
+ * 1) either indicate that invalid has been attempted to be executed,
+ * 2) or transfer the decoded instruction type from the decoding process to the execution process.
+ * Lastly it also contains the flag that is set when ctrl C signal is detected.
+ */
 typedef struct Emulation_properties {
 	unsigned int sys_clk;
 	unsigned int run_clk;

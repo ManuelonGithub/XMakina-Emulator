@@ -33,12 +33,15 @@ XMakina_instruction_set inst_set;
  * NOTES:
  * For this particular emulation, each step of the process took one clock cycle to perform.
  * This is just a particular aspect of the emulation, it does not change how the system behaves otherwise.
+ *
+ * NORMAL_OP_CLK_INC and PROCESS_FAILURE is defined in XMakina_Emulator_entities.h
+ * ENABLED is defined in Bus_Devices_Interrupt_operations.h
  */
 void CPU_cycle()
 {
 	inst_set.opcode = &sys_reg.IX.word;
 
-	if (reg_file.PSW.SLP == DISABLED) {
+	if (reg_file.PSW.SLP == ENABLED) {
 		fetch();
 		emulation.sys_clk += NORMAL_OP_CLK_INC;
 		emulation.run_clk += NORMAL_OP_CLK_INC;
@@ -69,6 +72,9 @@ void CPU_cycle()
 /* Fetch function:
  * Emulates part of the CPU cycle that fetches instruction data from memory (whose address is taken from the Program Counter)
  * And places the instruction word in the instruction register, to be decoded and then executed.
+ *
+ * LAST_BYTE, WORD_STEP, PROCESS_FAILURE and PROCESS_SUCCESS is defined in XMakina_Emulator_entities.h
+ * WORD and READ are defined in Bus_Devices_Interrupt_operations.h
  */
 void fetch()
 {

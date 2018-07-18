@@ -17,7 +17,7 @@
 
 #define MAX_16_BIT_VALUE (1 << 16)
 #define MAX_8_BIT_VALUE (1 << 8)
-#define MEM_BREAKPOINT_SIZE 32
+//#define MEM_BREAKPOINT_SIZE 32		Potential future work
 
 extern XMakina_memory memory;
 extern XMakina_register_file reg_file;

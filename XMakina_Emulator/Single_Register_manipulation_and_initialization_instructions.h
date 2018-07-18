@@ -16,13 +16,13 @@
 #include "XMakina_Emulator_entities.h"
 
 #pragma once
-
 #ifndef SINGLE_REGISTER_MANIPULATION_AND_INITIALIZATION_INSTRUCTIONS_H
 #define SINGLE_REGISTER_MANIPULATION_AND_INITIALIZATION_INSTRUCTIONS_H
 
-#define SINGLE_RIGHT_SHIFT(value) (value >>= 1)
+#define SINGLE_RIGHT_SHIFT(value) (value >>= 1)	// Shifts value right by 1 bit
 
 extern XMakina_register_file reg_file;
+extern System_registers sys_reg;
 
 /* Single Register intruction:
  *		- "Destination Register": 3 bits used to determine the destination register used in the execution.

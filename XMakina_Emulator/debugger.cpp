@@ -295,6 +295,9 @@ void toggle_priority_change_breakpoint()
 /* Register File Options function:
  * Displays the register file and their contents.
  * Offers the user the ability to change the contents of a register.
+ *
+ * NOTE:
+ * XMAKINA_CPU_REG_COUNT is defined in XMakina_Emulator_entities.h
  */
 void reg_file_options()
 {
@@ -356,6 +359,9 @@ void reg_file_options()
 /* change Register contents function:
  * Function that is called within the reg_file_options function.
  * It runs the user through the process of safely changing the contents of a register.
+ *
+ * NOTE:
+ * XMAKINA_CPU_REG_COUNT is defined in XMakina_Emulator_entities.h
  */
 void change_reg_content()
 {
@@ -448,6 +454,9 @@ void memory_menu()
 /* Top-Bottom memory view function:
  * Function is called within the memory_menu function.
  * It allows the user to view the machine's memory based on a bottom and top address boundary.
+ *
+ * NOTE:
+ * MEM_SIZE_BYTES is defined in XMakina_Emulator_entities.h
  */
 void top_bottom_memory_view()
 {
@@ -479,6 +488,9 @@ void top_bottom_memory_view()
 /* Change memory content function:
  * Function is called within the memory_menu function.
  * It runs the user through the process of safely changing the contents of a memory location.
+ *
+ * NOTE:
+ * MEM_SIZE_BYTES is defined in XMakina_Emulator_entities.h
  */
 void change_mem_content()
 {
@@ -513,6 +525,9 @@ void change_mem_content()
  * For future work, the memory view functions can be altered to also be allowed to 
  * change the contents of the memory they're addressing, or quick erasing of chunks of memory,
  * or any other use a user might think of.
+ *
+ * NOTE:
+ * MEM_SIZE_BYTES is defined in XMakina_Emulator_entities.h
  */
 void base_offset_memory_view()
 {
@@ -598,6 +613,9 @@ void close_program()
  * Great for testing the emulation or just seeing how it operates without needing to write a whole program.
  * It is a very bare-bones function, where it just utilizes the existing processes in the CPU cycle, \
  * and so will modify the contents of both memory and register file.
+ *
+ * NOTE:
+ * INVALID_INST is defined in CPU_operations.h
  */
 void test_inst_opcode()
 {
@@ -646,6 +664,9 @@ void test_inst_opcode()
 
 /* Debugger Triggers function:
  * This function performs all the conditional checks and upkeeping when it comes to the debugger breakpoints.
+ *
+ * NOTE:
+ * WORD_STEP, TRUE and FALSE is defined in XMakina_Emulator_entities.h
  */
 void debugger_triggers()
 {
@@ -694,6 +715,9 @@ void debugger_triggers()
  * used starting up the emulation or closing down a program.
  * ensures the system has a clean slate, and that all properties are initialized properly
  * when starting the machine/new program
+ *
+ * NOTE:
+ * FALSE is defined in XMakina_Emulator_entities.h
  */
 void clear_emulation_properties()
 {

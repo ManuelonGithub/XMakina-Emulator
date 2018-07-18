@@ -1,18 +1,30 @@
+/*
+* X-Makina Emulator Project - Two_Operand_instructions.h
+* Contains all the function prototypes and definitions used 
+* when the CPU cycle is executing a Two-Operand instruction.
+*
+* Programmer: Manuel Burnay
+*
+* Rev 1.0: Instructions work as intended and have been properly documented.
+*
+* Date created: 11/07/2018
+*/
 
 #include "XMakina_Emulator_entities.h"
 
 #pragma once
-#ifndef TWO_OPERAND_H
-#define TWO_OPERAND_H
+#ifndef TWO_OPERAND_INSTRUCTIONS_H
+#define TWO_OPERAND_INSTRUCTIONS_H
 
 #define REGISTER 0
 #define CONSTANT 1
-#define WORD_OP_CARRY_BIT 17
-#define BYTE_OP_CARRY_BIT 8
+#define WORD_OP_CARRY_BIT 17	// The carry bit in a 16-bit arrithmetic operation
+#define BYTE_OP_CARRY_BIT 8		// The carry bit in an 8-bit arrithmetic operation
 #define NO_CARRY 0
 #define SUBBING_TERM 1
 
 extern XMakina_register_file reg_file;
+extern System_registers sys_reg;
 
 /* Two-operand intruction:
 *		- "Destination Register": 3 bits used to determine the destination register used in the execution.
@@ -57,5 +69,5 @@ char MOV(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg);
 char SWAP(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg);
 
 
-#endif // !TWO_OPERAND_H
+#endif // !TWO_OPERAND_INSTRUCTIONS_H
 

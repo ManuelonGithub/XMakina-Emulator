@@ -41,6 +41,10 @@ char (*relative_memory_access_execution[]) (signed short, char, char, char) = { 
  *    1     0    1     (5) -> Pre increment
  *    1     1    0     (6) -> Pre decrement 
  *    Every other combination is invalid
+ *
+ * NOTE:
+ * WORD_STEP, PROCESS_FAILURE, PROCESS_SUCCESS is defined in XMakina_Emulator_entities.h
+ * READ, WRITE and WORD are defined in Bus_Devices_Interrupt_operations.h
  */
 
 
@@ -80,7 +84,7 @@ char LD(char action, char word_byte_control, char src_reg, char dst_reg)
 		break;
 
 	default:
-		return PROCESS_FAILURE;		// The reason all instruction executions return a flag.
+		return PROCESS_FAILURE;		// The reason all instruction executions return a flag. Plus it's returning a PROCESS_SUCCESS flag brings a nice conclusion to the cycle.
 		break;
 	}
 

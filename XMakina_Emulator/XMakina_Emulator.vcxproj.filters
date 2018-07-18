@@ -74,13 +74,13 @@
     <ClCompile Include="Single_Register_manipulation_and_initialization_instructions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bus_and_Device_operations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Two_Operand_instructions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XMakina_Emulator_entities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bus_Devices_Interrupt_operations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -12,9 +12,10 @@
 #include "stdafx.h"
 #include "Bus_Devices_Interrupt_operations.h"
 
+
 FILE * device_input_file = 0;		// It is initialized to 0 so the emulation can avoid attempting to read a file if it hasn't been opened.
 FILE * device_output_file = 0;
-Emulated_device device[DEVICE_NUMBER_SUPPORTED];
+Emulated_device device[DEVICE_NUMBER_SUPPORTED];	// NOTE: DEVICE_NUMBER_SUPPORTED is defined in XMakina_Emulator_entities.h
 input_device_data_queue input_dev_queue;
 char interrupt_queue[DEVICE_NUMBER_SUPPORTED];
 
@@ -24,6 +25,9 @@ char interrupt_queue[DEVICE_NUMBER_SUPPORTED];
  * The machine cannot communicate/address its memory without it.
  * The function handles read/write, byte/word controls,
  * and like in XMakina, only interacts with MAR and MBR.
+ *
+ * NOTE:
+ * WORD_ADDR_CONV, DEVICE_MEMORY_SPACE and MEMORY_ACCESS_CLK_INC are defined in XMakina_Emulator_entities.h
  */
 void bus(char word_byte_control, char read_write_control)
 {
@@ -54,6 +58,9 @@ void bus(char word_byte_control, char read_write_control)
 /* Device memory access:
  * Function is called by the bus to handle certain events that occur when the machine addresses 
  * the memory space allocated to device ports.
+ *
+ * NOTE:
+ * WORD_ADDR_CONV is defined in XMakina_Emulator_entities.h
  */
 char device_memory_access(char word_byte_control, char read_write_control)
 {
@@ -102,6 +109,9 @@ char device_memory_access(char word_byte_control, char read_write_control)
 /* Device initialization function:
  * Function that handles initialization of the devices and device ports.
  * Also handles opening the device files (input and output).
+ *
+ * NOTE:
+ * MEMORY_ACCESS_CLK_INC is defined in XMakina_Emulator_entities.h
  */
 void device_init()
 {
@@ -152,6 +162,9 @@ void device_init()
  * by reading the input device file, and managing the data insertion from the input devies,
  * to the appropriate memory location at the appropriate time,
  * or managing the data processing times of the output devices
+ *
+ * NOTE:
+ * MEMORY_ACCESS_CLK_INC is defined in XMakina_Emulator_entities.h
  */
 void device_management()
 {
@@ -248,6 +261,9 @@ void output_device_data_process(unsigned char dev_num)
  *	  where 3 bits of the PSW's reserved bits are now used to save the priority of the previous PSW
  *    that was pushed to the stack when a new interrupt vector is being serviced.
  *	  This allows the process to be far less expensive when returning from an ISR.
+ *
+ * NOTE:
+ * LAST_BYTE is defined in XMakina_Emulator_entities.h
  */
 void interrupt_handling_process(unsigned char dev_num)
 {
@@ -255,7 +271,7 @@ void interrupt_handling_process(unsigned char dev_num)
 		interrupt_queue[dev_num] = device[dev_num].int_vector.INT_PSW->PRIORITY;
 	}
 	else {
-		sys_reg.temp_reg.word = reg_file.PSW.PRIORITY;
+		sys_reg.temp_reg_a.word = reg_file.PSW.PRIORITY;
 
 		push(&reg_file.PC.word);
 		push(&reg_file.PSW.word);
@@ -263,7 +279,7 @@ void interrupt_handling_process(unsigned char dev_num)
 
 		reg_file.PSW.word = device[dev_num].int_vector.INT_PSW->word;
 		reg_file.PSW.SLP = DISABLED;
-		reg_file.PSW.prev_PRIORITY = sys_reg.temp_reg.word;
+		reg_file.PSW.prev_PRIORITY = sys_reg.temp_reg_a.word;
 
 		reg_file.PC.word = device[dev_num].int_vector.INT_PC->word;
 		reg_file.LR.word = LAST_BYTE;
@@ -279,6 +295,9 @@ void interrupt_handling_process(unsigned char dev_num)
  * so the process of returning from an interrupt doesn't require a heavy access to memory, which is expensive.
  * If an interrupt in the queue doesn't match the criteria, then the process will pull LR, PSW, and PC from the stack,
  * as it was determined to be the machine status with highest priority.
+ *
+ * NOTE:
+ * LOW_BYTE_MASK and DEVICE_NUMBER_SUPPORTED are defined in XMakina_Emulator_entities.h
  */
 void interrupt_return_process()
 {
@@ -309,6 +328,9 @@ void interrupt_return_process()
  * since memory_access_instruction.cpp already has Bus_Devices_Interrupt_operations.h as a dependacy.
  * Remaking this function allows the code above to be more organized and readible,
  * since it now follows the process laid out in XMakina's ISA with the same language (Push and Pull).
+ *
+ * NOTE:
+ * WORD_STEP is defined in XMakina_Emulator_entities.h
  */
 void push(unsigned short * reg)
 {
@@ -319,12 +341,15 @@ void push(unsigned short * reg)
 }
 
 /* Pull function:
-* Exact same functionality as LD +SP,Reg.
-* But using that instruction would cause conflicts when attempting to include the header of that file,
-* since memory_access_instruction.cpp already has Bus_Devices_Interrupt_operations.h as a dependacy.
-* Remaking this function allows the code above to be more organized and readible,
-* since it now follows the process laid out in XMakina's ISA with the same language (Push and Pull).
-*/
+ * Exact same functionality as LD +SP,Reg.
+ * But using that instruction would cause conflicts when attempting to include the header of that file,
+ * since memory_access_instruction.cpp already has Bus_Devices_Interrupt_operations.h as a dependacy.
+ * Remaking this function allows the code above to be more organized and readible,
+ * since it now follows the process laid out in XMakina's ISA with the same language (Push and Pull).
+ *
+ * NOTE:
+ * WORD_STEP is defined in XMakina_Emulator_entities.h
+ */
 void pull(unsigned short * reg)
 {
 	sys_reg.MAR = reg_file.SP.word;

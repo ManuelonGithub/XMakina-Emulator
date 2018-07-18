@@ -10,6 +10,8 @@
  * Rev 1.0: Instructions work as intended and have been properly documented.
  *
  * Date created: 10/07/2018
+ *
+ * General file note: Unless specified, any definitions/macros should be found the file's respective header.
  */
 
 
@@ -24,6 +26,8 @@ char (*conditional_branching_execution[]) (signed short) = { BEQ_BZ, BNE_BNZ, BC
  * the sign of the offset was made to extend to the 16-bits of the signed entity "label" by default.
  * So simply passing the offset by value (after it has been converted from a memory word space to memory byte space),
  * the sign extension step is completed.
+ * 
+ * WORD_STEP and PROCESS_SUCCESS is defined in XMakina_Emulator_entities.h
  */
 
 /****************** Branching with Link Instruction ******************/
