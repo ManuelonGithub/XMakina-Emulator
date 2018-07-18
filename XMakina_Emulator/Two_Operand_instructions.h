@@ -22,6 +22,7 @@
 #define BYTE_OP_CARRY_BIT 8		// The carry bit in an 8-bit arrithmetic operation
 #define NO_CARRY 0
 #define SUBBING_TERM 1
+#define BCD_VALUE_LIMIT 10
 
 extern XMakina_register_file reg_file;
 extern System_registers sys_reg;

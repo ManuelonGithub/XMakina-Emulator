@@ -84,21 +84,21 @@ char SRA(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SRA instruction.\n");
 
-	sys_reg.temp_reg_a = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
+	sys_reg.temp_reg_A = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
 
 	if (word_byte_control == WORD) {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.word);
-		BIT_CHANGE(sys_reg.temp_reg_a.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_A.word);
+		BIT_CHANGE(sys_reg.temp_reg_A.word, WORD_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi)));
 	}
 	else {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.LSB);
-		BIT_CHANGE(sys_reg.temp_reg_a.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_A.LSB);
+		BIT_CHANGE(sys_reg.temp_reg_A.LSB, BYTE_MSBi, (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi)));
 	}
 	
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_control);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_A.word, word_byte_control);
 	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);	// Update_PSW does not transfer the dst_reg's LSB to the PSW.C, so must be done here
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_A;
 
 	return PROCESS_SUCCESS;
 }
@@ -117,21 +117,21 @@ char RRC(char word_byte_control, char dst_reg)
 {
 	printf("Executing a RRC instruction.\n");
 
-	sys_reg.temp_reg_a = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
+	sys_reg.temp_reg_A = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
 
 	if (word_byte_control == WORD) {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.word);
-		BIT_CHANGE(sys_reg.temp_reg_a.word, WORD_MSBi, reg_file.PSW.C);
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_A.word);
+		BIT_CHANGE(sys_reg.temp_reg_A.word, WORD_MSBi, reg_file.PSW.C);
 	}
 	else {
-		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_a.LSB);
-		BIT_CHANGE(sys_reg.temp_reg_a.LSB, BYTE_MSBi, reg_file.PSW.C);
+		SINGLE_RIGHT_SHIFT(sys_reg.temp_reg_A.LSB);
+		BIT_CHANGE(sys_reg.temp_reg_A.LSB, BYTE_MSBi, reg_file.PSW.C);
 	}
 
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_control);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_A.word, word_byte_control);
 	reg_file.PSW.C = BIT_CHECK(reg_file.REG[dst_reg].LSB, LSBi);	// Update_PSW does not transfer the dst_reg's LSB to the PSW.C, so must be done here
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_A;
 
 	return PROCESS_SUCCESS;
 }
@@ -145,10 +145,10 @@ char SWPB(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SWPB instruction.\n");
 
-	sys_reg.temp_reg_a = reg_file.REG[dst_reg];
+	sys_reg.temp_reg_A = reg_file.REG[dst_reg];
 
-	reg_file.REG[dst_reg].MSB = sys_reg.temp_reg_a.LSB;
-	reg_file.REG[dst_reg].LSB = sys_reg.temp_reg_a.MSB;
+	reg_file.REG[dst_reg].MSB = sys_reg.temp_reg_A.LSB;
+	reg_file.REG[dst_reg].LSB = sys_reg.temp_reg_A.MSB;
 	
 	return PROCESS_SUCCESS;
 }
@@ -176,12 +176,12 @@ char SXT(char word_byte_control, char dst_reg)
 {
 	printf("Executing a SXT instruction.\n");
 
-	sys_reg.temp_reg_a = reg_file.REG[dst_reg];															// BIT_CHECK retreives bit 7's value of destination register
-	sys_reg.temp_reg_a.MSB = (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi) == 1) ? LOW_BYTE_MASK : 0;	// LOW_BYTE_MASK = 0xFF, so if bit 7 = 1 (negative #), MSB = 0xFF, otherwise MSB = 0;
+	sys_reg.temp_reg_A = reg_file.REG[dst_reg];															// BIT_CHECK retreives bit 7's value of destination register
+	sys_reg.temp_reg_A.MSB = (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi) == 1) ? LOW_BYTE_MASK : 0;	// LOW_BYTE_MASK = 0xFF, so if bit 7 = 1 (negative #), MSB = 0xFF, otherwise MSB = 0;
 																										
-	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_control);
+	update_PSW(reg_file.REG[dst_reg].word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_A.word, word_byte_control);
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_A;
 
 	return PROCESS_SUCCESS;
 }

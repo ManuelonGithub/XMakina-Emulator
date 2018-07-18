@@ -36,19 +36,19 @@ char(*two_operand_execution[]) (char, char, char, char) = { ADD, ADDC, SUB, SUBC
  */
 unsigned short arrithmetic(unsigned short src, unsigned short dst, unsigned short carry, char word_byte_ctrl)
 {
-	sys_reg.temp_reg_a.word = dst;
-	sys_reg.temp_reg_b.word = src;
+	sys_reg.temp_reg_A.word = dst;
+	sys_reg.temp_reg_B.word = src;
 
 	if (word_byte_ctrl == WORD) {
-		sys_reg.temp_reg_a.word = (sys_reg.temp_reg_b.word + sys_reg.temp_reg_b.word) + carry;
+		sys_reg.temp_reg_A.word = (sys_reg.temp_reg_B.word + sys_reg.temp_reg_B.word) + carry;
 	}
 	else {
-		sys_reg.temp_reg_a.LSB = (sys_reg.temp_reg_b.LSB + sys_reg.temp_reg_b.LSB) + carry;
+		sys_reg.temp_reg_A.LSB = (sys_reg.temp_reg_B.LSB + sys_reg.temp_reg_B.LSB) + carry;
 	}
 
-	update_PSW(src, dst, sys_reg.temp_reg_a.word, word_byte_ctrl);
+	update_PSW(src, dst, sys_reg.temp_reg_A.word, word_byte_ctrl);
 
-	return sys_reg.temp_reg_a.word;
+	return sys_reg.temp_reg_A.word;
 }
 
 /* Addition function:
@@ -147,14 +147,56 @@ char SUBC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 	return PROCESS_SUCCESS;
 }
 
+/* Binary Coded Decimal addition:
+ * Performs BCD addition between two 4-bit entities, referred to as nibbles. 
+ * It also takes into account a carry value.
+ * Each nibble is contained as a base-10 value (0..9), 
+ * and if the addition of the three arguments (nibbles 1 & 2 and the carry)
+ * is higher or equal to 10 (BCD_VALUE_LIMIT), the carry is asserted and 10 is subtracted from the result.
+ */
+unsigned short bcd_add(unsigned short nibble_1, unsigned short nibble_2,
+	unsigned short *carry)
+{
+	unsigned char res; // result of addition
+
+	res = nibble_1 + nibble_2 + *carry;
+	if (res >= BCD_VALUE_LIMIT)
+	{
+		res -= BCD_VALUE_LIMIT;
+		*carry = 1;
+	}
+	else
+		*carry = 0;
+
+	return res;
+}
+
 /* Decimal Addition function:
- *
+ * Function performs Decimal Addition with carry between two 16-bit values.
+ * The two 16-bit values are split between 4 nibbles of 4 bits each, that aren't allowed to have a value higher than 9 (10 causes a carry).
+ * Each nibbles is added together, checked that they are not higher, 
  *
  * NOTE:
- * PROCESS_SUCCESS is specifed in XMakina_Emulator_entities.h
+ * WORD and PROCESS_SUCCESS are specifed in XMakina_Emulator_entities.h
  */
 char DADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
+	unsigned short carry = reg_file.PSW.C;	// Cannot pass a bit field by reference, so a new variable must be created.
+
+	sys_reg.temp_reg_A.word = reg_file.REG[dst_reg].word;
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+
+	sys_reg.temp_reg_A.BCD.nib0 = bcd_add(sys_reg.temp_reg_B.BCD.nib0, sys_reg.temp_reg_A.BCD.nib0, &carry);
+	sys_reg.temp_reg_A.BCD.nib1 = bcd_add(sys_reg.temp_reg_B.BCD.nib1, sys_reg.temp_reg_A.BCD.nib1, &carry);
+
+	if (word_byte_ctrl == WORD) {
+		sys_reg.temp_reg_A.BCD.nib2 = bcd_add(sys_reg.temp_reg_B.BCD.nib2, sys_reg.temp_reg_A.BCD.nib2, &carry);
+		sys_reg.temp_reg_A.BCD.nib3 = bcd_add(sys_reg.temp_reg_B.BCD.nib3, sys_reg.temp_reg_A.BCD.nib3, &carry);
+	}
+
+	reg_file.PSW.C = carry;	// The final carry value is transfered to PSW.C
+
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_A;
 
 	return PROCESS_SUCCESS;
 }
@@ -190,18 +232,18 @@ char CMP(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char XOR(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_b.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		sys_reg.temp_reg_a.word = reg_file.REG[dst_reg].word ^ sys_reg.temp_reg_b.word;
+		sys_reg.temp_reg_A.word = reg_file.REG[dst_reg].word ^ sys_reg.temp_reg_B.word;
 	}
 	else {
-		sys_reg.temp_reg_a.LSB = reg_file.REG[dst_reg].LSB ^ sys_reg.temp_reg_b.LSB;
+		sys_reg.temp_reg_A.LSB = reg_file.REG[dst_reg].LSB ^ sys_reg.temp_reg_B.LSB;
 	}
 
-	update_PSW(sys_reg.temp_reg_b.word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_ctrl);
+	update_PSW(sys_reg.temp_reg_B.word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_A.word, word_byte_ctrl);
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_A;
 
 	return PROCESS_SUCCESS;
 }
@@ -217,18 +259,18 @@ char XOR(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char AND(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_b.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		sys_reg.temp_reg_a.word = reg_file.REG[dst_reg].word & sys_reg.temp_reg_b.word;
+		sys_reg.temp_reg_A.word = reg_file.REG[dst_reg].word & sys_reg.temp_reg_B.word;
 	}
 	else {
-		sys_reg.temp_reg_a.LSB = reg_file.REG[dst_reg].LSB & sys_reg.temp_reg_b.LSB;
+		sys_reg.temp_reg_A.LSB = reg_file.REG[dst_reg].LSB & sys_reg.temp_reg_B.LSB;
 	}
 
-	update_PSW(sys_reg.temp_reg_b.word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_ctrl);
+	update_PSW(sys_reg.temp_reg_B.word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_A.word, word_byte_ctrl);
 
-	reg_file.REG[dst_reg] = sys_reg.temp_reg_a;
+	reg_file.REG[dst_reg] = sys_reg.temp_reg_A;
 
 	return PROCESS_SUCCESS;
 }
@@ -245,16 +287,16 @@ char AND(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char BIT(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_b.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		sys_reg.temp_reg_a.word = reg_file.REG[dst_reg].word & sys_reg.temp_reg_b.word;
+		sys_reg.temp_reg_A.word = reg_file.REG[dst_reg].word & sys_reg.temp_reg_B.word;
 	}
 	else {
-		sys_reg.temp_reg_a.LSB = reg_file.REG[dst_reg].LSB & sys_reg.temp_reg_b.LSB;
+		sys_reg.temp_reg_A.LSB = reg_file.REG[dst_reg].LSB & sys_reg.temp_reg_B.LSB;
 	}
 
-	update_PSW(sys_reg.temp_reg_b.word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_a.word, word_byte_ctrl);
+	update_PSW(sys_reg.temp_reg_B.word, reg_file.REG[dst_reg].word, sys_reg.temp_reg_A.word, word_byte_ctrl);
 
 	return PROCESS_SUCCESS;
 }
@@ -269,14 +311,14 @@ char BIT(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char BIC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_b.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		reg_file.REG[dst_reg].word &= ~sys_reg.temp_reg_b.word;
+		reg_file.REG[dst_reg].word &= ~sys_reg.temp_reg_B.word;
 		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
 	}
 	else {
-		reg_file.REG[dst_reg].LSB &= ~sys_reg.temp_reg_b.LSB;
+		reg_file.REG[dst_reg].LSB &= ~sys_reg.temp_reg_B.LSB;
 		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi);
 	}
 
@@ -295,14 +337,14 @@ char BIC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char BIS(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_b.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		reg_file.REG[dst_reg].word |= sys_reg.temp_reg_b.word;
+		reg_file.REG[dst_reg].word |= sys_reg.temp_reg_B.word;
 		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].word, WORD_MSBi);
 	}
 	else {
-		reg_file.REG[dst_reg].LSB |= sys_reg.temp_reg_b.LSB;
+		reg_file.REG[dst_reg].LSB |= sys_reg.temp_reg_B.LSB;
 		reg_file.PSW.N = BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi);
 	}
 
@@ -320,13 +362,13 @@ char BIS(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char MOV(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_b.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
+	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
 	if (word_byte_ctrl == WORD) {
-		reg_file.REG[dst_reg].word = sys_reg.temp_reg_b.word;
+		reg_file.REG[dst_reg].word = sys_reg.temp_reg_B.word;
 	}
 	else {
-		reg_file.REG[dst_reg].LSB = sys_reg.temp_reg_b.LSB;
+		reg_file.REG[dst_reg].LSB = sys_reg.temp_reg_B.LSB;
 	}
 
 	return PROCESS_SUCCESS;
@@ -342,9 +384,9 @@ char MOV(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char SWAP(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	sys_reg.temp_reg_a.word = reg_file.REG[dst_reg].word;
+	sys_reg.temp_reg_A.word = reg_file.REG[dst_reg].word;
 	reg_file.REG[dst_reg].word = reg_file.REG[source].word;
-	reg_file.REG[source].word = sys_reg.temp_reg_a.word;
+	reg_file.REG[source].word = sys_reg.temp_reg_A.word;
 
 	return PROCESS_SUCCESS;
 }

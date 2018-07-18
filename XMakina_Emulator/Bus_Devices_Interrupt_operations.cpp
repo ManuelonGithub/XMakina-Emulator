@@ -271,7 +271,7 @@ void interrupt_handling_process(unsigned char dev_num)
 		interrupt_queue[dev_num] = device[dev_num].int_vector.INT_PSW->PRIORITY;
 	}
 	else {
-		sys_reg.temp_reg_a.word = reg_file.PSW.PRIORITY;
+		sys_reg.temp_reg_A.word = reg_file.PSW.PRIORITY;
 
 		push(&reg_file.PC.word);
 		push(&reg_file.PSW.word);
@@ -279,7 +279,7 @@ void interrupt_handling_process(unsigned char dev_num)
 
 		reg_file.PSW.word = device[dev_num].int_vector.INT_PSW->word;
 		reg_file.PSW.SLP = DISABLED;
-		reg_file.PSW.prev_PRIORITY = sys_reg.temp_reg_a.word;
+		reg_file.PSW.prev_PRIORITY = sys_reg.temp_reg_A.word;
 
 		reg_file.PC.word = device[dev_num].int_vector.INT_PC->word;
 		reg_file.LR.word = LAST_BYTE;

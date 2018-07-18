@@ -101,12 +101,20 @@ typedef union PSW_reg_format {
 /* Register Format structure:
  * speficies the structure of a general register.
  */
+typedef struct BCD_Overlay {
+	unsigned short nib0 : 4;
+	unsigned short nib1 : 4;
+	unsigned short nib2 : 4;
+	unsigned short nib3 : 4;
+} BCD_Overlay;
+
 typedef union register_format {
 	unsigned short word;
 	struct {
 		unsigned char LSB;
 		unsigned char MSB;
 	};
+	BCD_Overlay BCD;
 } register_format;
 
 /* XMakina Register File union:
@@ -155,8 +163,8 @@ typedef struct System_registers {
 	unsigned short MAR;
 	unsigned short MBR;
 	IX_bit_format IX;
-	register_format temp_reg_a;
-	register_format temp_reg_b;
+	register_format temp_reg_A;
+	register_format temp_reg_B;
 } System_registers;
 
 /* Emulation properties structure:
