@@ -58,13 +58,39 @@ enum BIT_MANIP { CLEAR, SET };
 
 void update_PSW(unsigned short src, unsigned short dst, unsigned short res, unsigned char W_B_ctrl);	// The function is here due to multiple functions requiring it.
 
+/* Notes on union/struction construction:
+ * The emulator has a heavy use of what is referred to anonymous structures/unions.
+ * There are utilized often within another structure/union, and look like:
+ *	struct {
+ *		...
+ *	};
+ *
+ *	or
+ *
+ *	union {
+ *		...
+ *	};
+ *
+ * They are very useful because they allow for the contents of the struct/union
+ * to be address by the over-arching struct/union without needing a name/base name,
+ * which allows for more complex structs/unions to not have exceedingly long names.
+ */
+
+
 /* Device port structure:
- * speficies the bit structure of the memory word dedicated to a device port
+ * speficies the bit structure of the memory word dedicated to a device port.
+ *
+ * Example of using both anonymous union and anoymous struct.
+ * With using the two anonymous definitions, 
+ * I am able to address all entities of a device port data type with only one '.'
+ *
+ * EX: Device_port dev -> dev.control, dev.data, dev.IE, dev.I_O, ... 
+ * Which is a far cry from (for example) dev.control.byte, dev.control.bits.IE, dev.control.bits.I_O, ...
  */
 typedef struct Device_port {
-	union {
+	union {							// Example of an anonymous union.
 		unsigned char control;
-		struct {
+		struct {					// Example of an anonymous struct.
 			unsigned char IE : 1;
 			unsigned char I_O : 1;
 			unsigned char DBA : 1;
@@ -98,9 +124,6 @@ typedef union PSW_reg_format {
 	};
 } PSW_reg_format;
 
-/* Register Format structure:
- * speficies the structure of a general register.
- */
 typedef struct BCD_Overlay {
 	unsigned short nib0 : 4;
 	unsigned short nib1 : 4;
@@ -108,6 +131,9 @@ typedef struct BCD_Overlay {
 	unsigned short nib3 : 4;
 } BCD_Overlay;
 
+/* Register Format structure:
+* speficies the structure of a general register.
+*/
 typedef union register_format {
 	unsigned short word;
 	struct {

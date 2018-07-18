@@ -43,7 +43,7 @@ typedef struct input_device_data_queue {
 } input_device_data_queue;
 
 typedef struct device_interrupt_vector {
-	union {
+	union {							// Using anonymous union and struct. See XMakina_Emulator_Entities.h for a note of their use.
 		unsigned short * word[2];
 		struct {
 			PSW_reg_format * INT_PSW;
