@@ -20,9 +20,10 @@
  */
 void loader()
 {
-	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Loader Program ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Program Loader ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
 	char filename[100];
+	int record_decoder_flag = 0;
 
 	printf("file name: ");
 	scanf_s("%s", &filename, 100);
@@ -36,9 +37,21 @@ void loader()
 	char s_record[S_RECORD_MAX_SIZE];
 
 	while (fgets(s_record, S_RECORD_MAX_SIZE, s_record_file)) {
-		if (s_record_decoder(s_record) == CHECKSUM_ERROR) {
-			printf("S-Record checksum error. \n\n");
+		record_decoder_flag = s_record_decoder(s_record);
+
+		switch (record_decoder_flag)
+		{
+		case (CHECKSUM_ERROR):
+			printf("Loader: Checksum error detected. Contents in the S-record file are corrupted.\n");
 			return;
+			break;
+
+		case (S_RECORD_ERROR):
+			printf("Loader: File opened is not a S-record file.\n");
+			return;
+			break;
+		default:
+			break;
 		}
 	}
 

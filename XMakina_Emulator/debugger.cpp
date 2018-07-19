@@ -32,16 +32,21 @@ void debugger_main_menu()
 	while (1) {
 		printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Xmakina Debugger: Main Menu ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
 
+		if (strlen(emulation.device_file_name) != 0) {
+			printf("Device file loaded: \t%s\n\n", emulation.device_file_name);
+		}
 		if (strlen(emulation.program_name) == 0) {
-			printf("No program loaded.\n\n");
+			printf("No program loaded.\n");
 		}
 		else {
-			printf("%s program has been loaded.\n\n", emulation.program_name);
+			printf("Active Program: \t%s\n\n", emulation.program_name);
+			printf("Active Program clock count: %d\n", emulation.sys_clk);
+			printf("Current Program counter:    0x%04X\n", reg_file.PC.word);
 		}
 
 		menu_option = 0;
 		
-		printf("Input your option (Input H for menu options):\t");
+		printf("\nInput your option (Input H for menu options):\t");
 		scanf_s(" %c", &menu_option, 1);
 		menu_option = toupper(menu_option);
 
@@ -68,8 +73,14 @@ void debugger_main_menu()
 			break;
 
 		case (QUIT_EMULATOR):
-			emulation.system_status = QUIT_EMULATOR;
-			return;
+			printf("Are you sure you want to quit the emulator? (Y/N)\t");
+			scanf_s(" %c", &menu_option, 1);
+			menu_option = toupper(menu_option);
+
+			if (menu_option == 'Y') {
+				emulation.system_status = QUIT_EMULATOR;
+				return;
+			}
 			break;
 
 		case (REG_FILE_OPTIONS):
@@ -94,9 +105,9 @@ void debugger_main_menu()
 
 		case (MENU_HELP):
 			printf("Main Menu options:\n");
-			printf("B = Breakpoint menu | G = \"Go\" or Run program  | Q = Quit program | R = Register File Menu\n");
-			printf("M = Memory Menu     | S = Sanity check Options | L = Load file | X = Close Porgram\n");
-			printf("I = Instruction Opcode testing\n\n");
+			printf("B = Breakpoint menu  | G = \"Go\" or Run program        | Q = Quit program      | R = Register File Menu\n");
+			printf("M = Memory Menu      | S = Sanity check Options       | L = Load Program file | X = Close Porgram\n");
+			printf("D = Load device File | I = Instruction Opcode testing |\n\n");
 			break;
 
 		default:
@@ -199,7 +210,7 @@ void view_current_breakpoints()
 		printf("Not enabled.");
 	}
 
-	printf("\ncpu cycle Breakpoint: \t");
+	printf("\ncpu cycle Breakpoint: \t\t");
 	if ((signed int)breakpoints.cpu_cycle != OFF) {
 		printf("%d cpu cycles", breakpoints.cpu_cycle);
 	}
@@ -310,7 +321,7 @@ void reg_file_options()
 		/* The three instances of the reg_file.word allows the system to show the contents of each register 
 		   in ways that might be useful to the user (Hex, unsigned, and signed) */
 		for (i = 0; i < XMAKINA_CPU_REG_COUNT; i++) {
-			printf("R%d : 0x%04X  (%d or %d)\n", i, reg_file.REG[i].word, reg_file.REG[i].word, (signed short)reg_file.REG[i].word);
+			printf("R%d : 0x%04X  (%d)\n", i, reg_file.REG[i].word, reg_file.REG[i].word);
 		}
 
 		printf("\nInput 'C' to change a value of a register, 'X' to clear the register file, and 'Q' to go back to main menu.\n");
@@ -535,20 +546,20 @@ void base_offset_memory_view()
 	int offset;
 
 	printf("\nInput the hex value of the base address:\t0x");
-	scanf_s("%x", &base_mem_loc);
-	getchar();
+	scanf_s(" %x", &base_mem_loc);
 
 	printf("Input the integer value (+/-) of the offset:\t");
-	scanf_s("%d", &offset);
-	getchar();
+	scanf_s(" %d", &offset);
 
-	if ((base_mem_loc + offset) < MEM_SIZE_BYTES) {
-		if ((base_mem_loc + offset) < base_mem_loc) {
+	offset += base_mem_loc;
+
+	if ((offset) < MEM_SIZE_BYTES) {
+		if ((offset) < base_mem_loc) {
 			top_lim = base_mem_loc;
-			bottom_lim = (base_mem_loc + offset);
+			bottom_lim = offset;
 		}
 		else {
-			top_lim = (base_mem_loc + offset);
+			top_lim = offset;
 			bottom_lim = base_mem_loc;
 		}
 
@@ -673,22 +684,26 @@ void debugger_triggers()
 	if (breakpoints.memory == reg_file.PC.word) {	// Memory breakpoint check
 		breakpoints.memory = OFF;
 		debugger_main_menu();
+		return;
 	}
 
-	else if (breakpoints.cpu_cycle != OFF) {					// Cpu cycle breakpoint check
+	if (breakpoints.cpu_cycle != OFF) {					// Cpu cycle breakpoint check
 		if (breakpoints.cycle_count >= breakpoints.cpu_cycle) {
 			breakpoints.cpu_cycle = OFF;
 			breakpoints.cycle_count = 0;
 			debugger_main_menu();
+			return;
 		}
 		else {
 			breakpoints.cycle_count++;
 		}
 	}
 
-	else if (breakpoints.branch == ON) {								// Branch breakpoint check
+	if (breakpoints.branch == ON) {								// Branch breakpoint check
 		if (breakpoints.PC_check != (reg_file.PC.word - WORD_STEP)) {
+			breakpoints.PC_check = reg_file.PC.word;
 			debugger_main_menu();
+			return;
 		}
 		else {
 			breakpoints.PC_check = reg_file.PC.word;
@@ -696,18 +711,21 @@ void debugger_triggers()
 	}
 
 	// Priority breakpoint check
-	else if ((signed char)breakpoints.priority != OFF && breakpoints.priority != reg_file.PSW.PRIORITY) {
+	if ((signed char)breakpoints.priority != OFF && breakpoints.priority != reg_file.PSW.PRIORITY) {
 		debugger_main_menu();
+		return;
 	}
 
-	else if (breakpoints.step == ON) {	// Program stepping check
+	if (breakpoints.step == ON) {	// Program stepping check
 		debugger_main_menu();
+		return;
 	}
 
-	else if (emulation.ctrl_C_detected == TRUE) {	// Ctrl+C detection check
+	if (emulation.ctrl_C_detected == TRUE) {	// Ctrl+C detection check
 		printf("\n\n^C has been detected!\n\n");
 		emulation.ctrl_C_detected = FALSE;
 		debugger_main_menu();
+		return;
 	}
 }
 
@@ -722,6 +740,7 @@ void debugger_triggers()
 void clear_emulation_properties()
 {
 	emulation.program_name[0] = '\0';
+	emulation.device_file_name[0] = '\0';
 	emulation.system_status = ON;
 	emulation.sys_clk = 0;
 	emulation.run_clk = 0;

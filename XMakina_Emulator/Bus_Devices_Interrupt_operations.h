@@ -66,6 +66,7 @@ typedef struct Emulated_device {
 } Emulated_device;
 
 void device_init();
+void close_device_files();
 void device_management();
 void input_device_data_process(unsigned char dev_num, unsigned char data);
 void output_device_data_process(unsigned char dev_num);

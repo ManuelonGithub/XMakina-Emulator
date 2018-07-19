@@ -1,0 +1,4 @@
+Output device 3 has recieved the char ¢ on clock 267
+Machine has failed to read the char C from input device 5. This data has been overrun on clock 330.
+Output device 4 has recieved the char V on clock 666
+Output device 3 has recieved the char ³ on clock 771

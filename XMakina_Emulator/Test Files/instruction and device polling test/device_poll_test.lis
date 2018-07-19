@@ -1,0 +1,90 @@
+X-Makina Assembler - Version 1.18 (27 June 2018)
+.ASM file: device_poll_test.asm
+
+  1	    	     	;
+  2	    	     	; Polling example 
+  3	    	     	; Polling three input devices (0, 1, and 2)
+  4	    	     	;
+  5	    	     	; Registers:
+  6	    	     	;
+  7	    	     	PC	equ	R7
+  8	    	     	PSW	equ	R6
+  9	    	     	SP	equ	R5
+ 10	    	     	LR	equ	R4
+ 11	    	     	;
+ 12	    	     	; Device memory
+ 13	    	     	;
+ 14	    	     		ORG	#0
+ 15	0000	0000	Dev0	BSS	#2
+ 16	0002	0000	Dev1	BSS	#2
+ 17	0004	0000	Dev2	BSS	#2
+ 18	    	     	;
+ 19	    	     	; Start of code
+ 20	    	     	;
+ 21	    	     		ORG	#$100
+ 22	    	     	Mainline
+ 23	0100	9000		MOVL	Dev0,R0		; Address of device 0 (base address)
+ 24	0102	A000		MOVH	Dev0,R0
+ 25	    	     	;
+ 26	    	     	PollingLoop
+ 27	0104	C001		LDR	R0,#0,R1	; Read Dev0 Data and S/C reg
+ 28	0106	6ED9		AND.B	#4,R1		; Check DBA
+ 29	0108	2407		BNE	Dev0Hdlr	; Char avail -> goto Dev0Hdlr
+ 30	010A	C101		LDR	R0,#2,R1	; Read Dev1 Data and S/C reg
+ 31	010C	6ED9		AND.B	#4,R1		; Check DBA
+ 32	010E	2409		BNE	Dev1Hdlr	; Char avail -> goto Dev1Hdlr
+ 33	0110	C201		LDR	R0,#4,R1	; Read Dev2 Data and S/C reg
+ 34	0112	6ED9		AND.B	#4,R1		; Check DBA
+ 35	0114	240A		BNE	Dev2Hdlr	; Char avail -> goto Dev2Hdlr
+ 36	    	     	;
+ 37	0116	3FF6		BAL	PollingLoop	; Nothing found -- repeat
+ 38	    	     	;
+ 39	    	     	Dev0Hdlr
+ 40	0118	7501		SWPB	R1		; Data byte in LSB (Dev 0)
+ 41	011A	7701		SXT	R1
+ 42	011C	728E		BIC #1,PSW
+ 43	011E	7301		RRC	R1
+ 44	    	     	;	...			; Process byte
+ 45	0120	3FF1		BAL	PollingLoop	; Repeat polling loop
+ 46	    	     	Dev1Hdlr
+ 47	0122	7501		SWPB	R1		; Data byte in LSB (Dev 1)
+ 48	0124	764B		MOV.B	R1,R3
+ 49	0126	600B		ADD	R1,R3
+ 50	    	     	;	...			; Process byte
+ 51	0128	3FED		BAL	PollingLoop	; Repeat polling loop
+ 52	    	     	Dev2Hdlr
+ 53	012A	7501		SWPB	R1		; Data byte in LSB (Dev 2)
+ 54	012C	7811		SWAP	R2,R1
+ 55	012E	7702		SXT	R2
+ 56	0130	7102		SRA	R2
+ 57	    	     	;	...			; Process byte
+ 58	0132	3FE8		BAL	PollingLoop	; Repeat polling loop
+ 59	    	     	;
+ 60	    	     		END	Mainline
+Successful completion of assembly
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+Dev2Hdlr                           	LBL	012A	298
+Dev1Hdlr                           	LBL	0122	290
+Dev0Hdlr                           	LBL	0118	280
+PollingLoop                        	LBL	0104	260
+Mainline                           	LBL	0100	256
+Dev2                               	LBL	0004	4
+Dev1                               	LBL	0002	2
+Dev0                               	LBL	0000	0
+LR                                 	REG	0004	4
+SP                                 	REG	0005	5
+PSW                                	REG	0006	6
+PC                                 	REG	0007	7
+R7                                 	REG	0007	7
+R6                                 	REG	0006	6
+R5                                 	REG	0005	5
+R4                                 	REG	0004	4
+R3                                 	REG	0003	3
+R2                                 	REG	0002	2
+R1                                 	REG	0001	1
+R0                                 	REG	0000	0
+
+.XME file: C:\Users\Manuel\Desktop\Computer Architecture\XMakina assembler\device_poll_test.xme
+

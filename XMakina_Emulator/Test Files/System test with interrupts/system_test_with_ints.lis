@@ -1,0 +1,163 @@
+X-Makina Assembler - Version 1.18 (27 June 2018)
+.ASM file: system_test_with_ints.asm
+
+  1	    	     	;
+  2	    	     	; Polling example 
+  3	    	     	; Polling three input devices (0, 1, and 2)
+  4	    	     	;
+  5	    	     	; Registers:
+  6	    	     	;
+  7	    	     	PC	equ	R7
+  8	    	     	PSW	equ	R6
+  9	    	     	SP	equ	R5
+ 10	    	     	LR	equ	R4
+ 11	    	     	; Status/control bits
+ 12	    	     	;
+ 13	    	     	DBA	equ	#4	; DBA bit
+ 14	    	     	IE	equ	#1	; IE bit
+ 15	    	     	;
+ 16	    	     	; PSW priorities
+ 17	    	     	;
+ 18	    	     	PRIOR7	equ	#$E0
+ 19	    	     	PRIOR4	equ	#$80
+ 20	    	     	PRIOR3	equ	#$60
+ 21	    	     	; Device memory
+ 22	    	     	;
+ 23	    	     		ORG	#0
+ 24	0000	0000	Dev0	BSS	#2
+ 25	0002	0000	Dev1	BSS	#2
+ 26	0004	0000	Dev2	BSS	#2
+ 27	0006	0001	Dev3SCR	byte	IE
+ 28	0007	0000	Dev3Out	byte	#0
+ 29	0008	0001	Dev4SCR	byte	IE
+ 30	0009	0000	Dev4Out	byte	#0
+ 31	000A	0000	Dev5	BSS #2
+ 32	    	     	;
+ 33	    	     	; Start of code
+ 34	    	     	;
+ 35	    	     		ORG	#$100
+ 36	    	     	Mainline
+ 37	0100	9605		movl	StkTop,SP
+ 38	0102	A7FD		movh	StkTop,SP
+ 39	0104	9000		MOVL	Dev0,R0		; Address of device 0 (base address)
+ 40	0106	A000		MOVH	Dev0,R0
+ 41	    	     	;
+ 42	    	     	PollingLoop
+ 43	0108	C001		LDR	R0,#0,R1	; Read Dev0 Data and S/C reg
+ 44	010A	6ED9		AND.B	#4,R1		; Check DBA
+ 45	010C	240A		BNE	Dev0Hdlr	; Char avail -> goto Dev0Hdlr
+ 46	010E	C101		LDR	R0,#2,R1	; Read Dev1 Data and S/C reg
+ 47	0110	6ED9		AND.B	#4,R1		; Check DBA
+ 48	0112	240E		BNE	Dev1Hdlr	; Char avail -> goto Dev1Hdlr
+ 49	0114	C201		LDR	R0,#4,R1	; Read Dev2 Data and S/C reg
+ 50	0116	6ED9		AND.B	#4,R1		; Check DBA
+ 51	0118	2411		BNE	Dev2Hdlr	; Char avail -> goto Dev2Hdlr
+ 52	011A	C501		LDR	R0,#10,R1	; Read Dev2 Data and S/C reg
+ 53	011C	6ED9		AND.B	#4,R1		; Check DBA
+ 54	011E	2416		BNE	Dev5Hdlr	; Char avail -> goto Dev2Hdlr
+ 55	    	     	;
+ 56	0120	3FF3		BAL	PollingLoop	; Nothing found -- repeat
+ 57	    	     	;
+ 58	    	     	Dev0Hdlr
+ 59	0122	7501		SWPB	R1		; Data byte in LSB (Dev 0)
+ 60	0124	748E		BIS #1,PSW
+ 61	0126	7341		RRC.B	R1
+ 62	0128	7701		SXT	R1
+ 63	012A	6291		ADDC	#2,R1
+ 64	012C	E3C8		STR.B	R1,R0,#7	; Trigger dev3 data process
+ 65	012E	3FEC		BAL	PollingLoop	; Repeat polling loop
+ 66	    	     	;
+ 67	    	     	Dev1Hdlr
+ 68	0130	7501		SWPB	R1		; Data byte in LSB (Dev 1)
+ 69	0132	764B		MOV.B	R1,R3
+ 70	0134	9FF9		MOVLZ	#$FF,R1
+ 71	0136	6419		SUB	R3,R1
+ 72	0138	680A		DADD	R1,R2
+ 73	013A	3FE6		BAL	PollingLoop	; Repeat polling loop
+ 74	    	     	;
+ 75	    	     	Dev2Hdlr
+ 76	013C	7501		SWPB	R1		; Data byte in LSB (Dev 2)
+ 77	013E	6CB9		XOR	#-1,R1
+ 78	0140	72BA		BIC	#-1,R2
+ 79	0142	A082		MOVH	#$1000,R2
+ 80	0144	890A		ST	R1,R2+
+ 81	0146	9AB1		MOVLZ	#'V',R1
+ 82	0148	E4C8		STR.B	R1,R0,#9	; Trigger dev3 data process
+ 83	014A	3FDE		BAL	PollingLoop	; Repeat polling loop
+ 84	    	     	;
+ 85	    	     	Dev5Hdlr
+ 86	014C	7501		SWPB	R1		; Data byte in LSB (Dev 2)
+ 87	014E	70C9		BIT.B	#1,R1
+ 88	0150	2002		BEQ	ODD
+ 89	0152	6A81		CMP	#0,R1
+ 90	0154	3FD9		BAL	PollingLoop	; Repeat polling loop
+ 91	    	     		
+ 92	    	     	ODD
+ 93	0156	7101		SRA	R1
+ 94	0158	3FD7		BAL	PollingLoop	; Repeat polling loop
+ 95	    	     		
+ 96	    	     		ORG	#$6000
+ 97	    	     	dev3ISR
+ 98	6000	9FF9		MOVLZ #$FF,R1
+ 99	6002	6091		ADD	#2,R1
+100	6004	7627		mov	LR,PC	
+101	    	     		
+102	    	     	dev4ISR
+103	6006	9881		MOVLZ	#16,R1
+104	6008	6809		DADD	R1,R1
+105	600A	7627		mov	LR,PC
+106	    	     		
+107	    	     		org	#$FFC0
+108	    	     	StkTop
+109	    	     	;Dev3 vector
+110	    	     		org	#$FFCC
+111	FFCC	0080		word	PRIOR4
+112	FFCE	6000		word	dev3ISR
+113	    	     	;
+114	    	     	;Dev4 vector
+115	FFD0	0080		word	PRIOR4
+116	FFD2	6006		word	dev4ISR
+117	    	     		
+118	    	     		END	Mainline
+Successful completion of assembly
+
+** Symbol table **
+Name                               	Type	Value	Decimal
+dev4ISR                            	LBL	6006	24582
+dev3ISR                            	LBL	6000	24576
+ODD                                	LBL	0156	342
+Dev5Hdlr                           	LBL	014C	332
+Dev2Hdlr                           	LBL	013C	316
+Dev1Hdlr                           	LBL	0130	304
+Dev0Hdlr                           	LBL	0122	290
+PollingLoop                        	LBL	0108	264
+StkTop                             	LBL	FFC0	-64
+Mainline                           	LBL	0100	256
+Dev5                               	LBL	000A	10
+Dev4Out                            	LBL	0009	9
+Dev4SCR                            	LBL	0008	8
+Dev3Out                            	LBL	0007	7
+Dev3SCR                            	LBL	0006	6
+Dev2                               	LBL	0004	4
+Dev1                               	LBL	0002	2
+Dev0                               	LBL	0000	0
+PRIOR3                             	LBL	0060	96
+PRIOR4                             	LBL	0080	128
+PRIOR7                             	LBL	00E0	224
+IE                                 	LBL	0001	1
+DBA                                	LBL	0004	4
+LR                                 	REG	0004	4
+SP                                 	REG	0005	5
+PSW                                	REG	0006	6
+PC                                 	REG	0007	7
+R7                                 	REG	0007	7
+R6                                 	REG	0006	6
+R5                                 	REG	0005	5
+R4                                 	REG	0004	4
+R3                                 	REG	0003	3
+R2                                 	REG	0002	2
+R1                                 	REG	0001	1
+R0                                 	REG	0000	0
+
+.XME file: C:\Users\Manuel\Desktop\Computer Architecture\XMakina assembler\system_test_with_ints.xme
+

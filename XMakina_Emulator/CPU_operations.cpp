@@ -41,7 +41,7 @@ void CPU_cycle()
 {
 	inst_set.opcode = &sys_reg.IX.word;
 
-	if (reg_file.PSW.SLP == ENABLED) {
+	if (reg_file.PSW.SLP == DISABLED) {
 		fetch();
 		emulation.sys_clk += NORMAL_OP_CLK_INC;
 		emulation.run_clk += NORMAL_OP_CLK_INC;

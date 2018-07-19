@@ -18,6 +18,7 @@ FILE * device_output_file = 0;
 Emulated_device device[DEVICE_NUMBER_SUPPORTED];	// NOTE: DEVICE_NUMBER_SUPPORTED is defined in XMakina_Emulator_entities.h
 input_device_data_queue input_dev_queue;
 char interrupt_queue[DEVICE_NUMBER_SUPPORTED];
+char input_file_EOF = 0;
 
 
 /* Bus function:
@@ -66,43 +67,44 @@ char device_memory_access(char word_byte_control, char read_write_control)
 {
 	unsigned char dev_num = WORD_ADDR_CONV(sys_reg.MAR);
 
-	if (sys_reg.MAR % 2 == 1) {					// This operation determines if the MAR address is odd 
-		switch (device[dev_num].dev_port->I_O)
-		{
-		case (INPUT):
-			if (read_write_control == READ) {
-				device[dev_num].dev_port->DBA = DISABLED;
-				sys_reg.MBR = (word_byte_control == WORD) ? memory.word[WORD_ADDR_CONV(sys_reg.MAR)] : memory.byte[sys_reg.MAR];
-				return DEVICE_MEM_ACCESS;
-			}
-			else {
-				return NORMAL_MEM_ACCESS;	// In order to satisfy the instruction of the user, 
-			}								// even if it was determined that it an invalid attempt of starting a device data transfer process,
-			break;							// The system will still follow through with the memory access instruction.
-
-		case (OUTPUT):
-			if (read_write_control == WRITE) {
-				if (device[dev_num].dev_port->DBA = DISABLED) {
-					device[dev_num].dev_port->OV = ENABLED;
-				}
-
-				device[dev_num].dev_port->DBA = DISABLED;
-				memory.byte[sys_reg.MAR] = (unsigned char)sys_reg.MBR;
-				device[dev_num].time_left = device[dev_num].proc_time;
-				return DEVICE_MEM_ACCESS;
-			}
-			else {
-				return NORMAL_MEM_ACCESS;	// What was said above (line 70) applies here as well.
-			}
-			break;
-
-		default:
-			return NORMAL_MEM_ACCESS;
-			break;
+	switch (device[dev_num].dev_port->I_O)
+	{
+	case (INPUT):
+		if (read_write_control == READ) {
+			sys_reg.MBR = (word_byte_control == WORD) ? memory.word[WORD_ADDR_CONV(sys_reg.MAR)] : memory.byte[sys_reg.MAR];
+			device[dev_num].dev_port->DBA = DISABLED;
+			return DEVICE_MEM_ACCESS;
 		}
-	}
-	else {
+		else {
+			return NORMAL_MEM_ACCESS;	// In order to satisfy the instruction of the user, 
+		}								// even if it was determined that it an invalid attempt of starting a device data transfer process,
+		break;							// The system will still follow through with the memory access instruction.
+
+	case (OUTPUT):
+		if (read_write_control == WRITE) {
+			if (device[dev_num].dev_port->DBA = DISABLED) {
+				device[dev_num].dev_port->OV = ENABLED;
+			}
+
+			if (word_byte_control == WORD) {
+				memory.word[WORD_ADDR_CONV(sys_reg.MAR)] = sys_reg.MBR;
+			}
+			else {
+				memory.byte[sys_reg.MAR] = (unsigned char)sys_reg.MBR;
+			}
+
+			device[dev_num].dev_port->DBA = DISABLED;
+			device[dev_num].time_left = device[dev_num].proc_time;
+			return DEVICE_MEM_ACCESS;
+		}
+		else {
+			return NORMAL_MEM_ACCESS;
+		}
+		break;
+
+	default:
 		return NORMAL_MEM_ACCESS;
+		break;
 	}
 }
 
@@ -115,10 +117,14 @@ char device_memory_access(char word_byte_control, char read_write_control)
  */
 void device_init()
 {
+	close_device_files();
+
+	printf("\n=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~ Device File Loader ~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=~=\n\n");
+
 	char filename[100];
 	char out_filename[107] = "OUTPUT_";
 
-	int i, IO, proc_time;
+	int dev, i, IO, proc_time;
 
 	printf("file name: ");
 	scanf_s("%s", &filename, 100);
@@ -136,26 +142,42 @@ void device_init()
 		return;
 	}
 
+	strcpy_s(emulation.device_file_name, sizeof(emulation.device_file_name), filename);
+
 	for (i = 0; i < DEVICE_NUMBER_SUPPORTED; i++) {
 		interrupt_queue[i] = INT_OFF;
 
 		device[i].dev_port = &memory.dev_port[i];
-		device[i].dev_port->control = 0;
 		device[i].int_vector.word[0] = &memory.word[DEV_INT_VECT_PSW_WORD(i)];
 		device[i].int_vector.word[1] = &memory.word[DEV_INT_VECT_PC_WORD(i)];
 
-		fscanf_s(device_input_file, "%d %d", &IO, &proc_time);
+		fscanf_s(device_input_file, "%d %d %d", &dev, &IO, &proc_time);
 
 		device[i].dev_port->I_O = IO;
 		device[i].proc_time = proc_time;
 	}
 
-	for (i = 0; i < DEVICE_NUMBER_SUPPORTED; i++) {
-		printf("Dev%d: I/O = %d\n", i, device[i].dev_port->I_O);
-	}
+	//for (i = 0; i < DEVICE_NUMBER_SUPPORTED; i++) {
+	//	printf("Dev%d: I/O = %d, Processing time = %d\n", i, device[i].dev_port->I_O, device[i].proc_time);
+	//}
 	input_dev_queue.data_avail = 0;
 }
 
+/* Close device file function:
+ * Securely closes any opened input and output device files.
+ * Re-initializes the FILE pointers to 0, 
+ * so device related functions aren't executed.
+ */
+void close_device_files()
+{
+	if (device_input_file != 0) {
+		fclose(device_input_file);
+		fclose(device_output_file);
+		device_input_file = 0;
+		device_output_file = 0;
+		memset(emulation.device_file_name, '\0', sizeof(emulation.device_file_name));
+	}
+}
 /* Device management function:
  * Function is called at the end of every CPU cycle.
  * It handles data communication between XMakina and devices,
@@ -171,18 +193,33 @@ void device_management()
 	int i;
 
 	if (device_input_file != 0) {
-		if (input_dev_queue.data_avail == 1) {
-			if (input_dev_queue.clk <= emulation.sys_clk) {
+		while (input_dev_queue.clk <= emulation.sys_clk && input_file_EOF != 1) {
+			if (input_dev_queue.data_avail == 1) {
 				input_device_data_process(input_dev_queue.dev, input_dev_queue.data);
 				input_dev_queue.data_avail = 0;
 			}
+			else {
+				if (fscanf_s(device_input_file, "%d %d %c", &input_dev_queue.clk, &input_dev_queue.dev, &input_dev_queue.data) == EOF) {
+					input_file_EOF = 1;
+				}
+				input_dev_queue.data_avail = 1;
+			}
 		}
-		else {
-			fscanf_s(device_input_file, "%d %d %c", &input_dev_queue.clk, &input_dev_queue.dev, &input_dev_queue.data);
-			input_dev_queue.data_avail = 1;
-		}
+		//if (input_dev_queue.data_avail == 1) {
+		//	if (input_dev_queue.clk <= emulation.sys_clk) {
+		//		input_device_data_process(input_dev_queue.dev, input_dev_queue.data);
+		//		input_dev_queue.data_avail = 0;
+		//	}
+		//}
+		//// The second conditional check allows the system to read the file in the same run that it processed in device data
+		//if (input_dev_queue.data_avail == 0) {
+		//	if (fscanf_s(device_input_file, "%d %d %c", &input_dev_queue.clk, &input_dev_queue.dev, &input_dev_queue.data) == EOF) {
+		//		input_file_EOF = 1;
+		//	}
+		//	input_dev_queue.data_avail = 1;
+		//}
 
-		printf("device queue:\n clk for event: %d\n dev: %d \n data: %c \n", input_dev_queue.clk, input_dev_queue.dev, input_dev_queue.data);
+		//printf("device queue:\n clk for event: %d\n dev: %d \n data: %c \n", input_dev_queue.clk, input_dev_queue.dev, input_dev_queue.data);
 
 		for (i = 0; i < DEVICE_NUMBER_SUPPORTED; i++) {
 			if (device[i].dev_port->I_O == OUTPUT && device[i].time_left > 0) {
@@ -216,7 +253,7 @@ void input_device_data_process(unsigned char dev_num, unsigned char data)
 
 	device[dev_num].dev_port->data = data;
 
-	if (device[dev_num].dev_port->IE = ENABLED) {
+	if (device[dev_num].dev_port->IE == ENABLED) {
 		interrupt_handling_process(dev_num);
 	}
 }
@@ -240,7 +277,7 @@ void output_device_data_process(unsigned char dev_num)
 		fprintf(device_output_file, "Output device %d has recieved the char %c on clock %d\n", dev_num, device[dev_num].dev_port->data, emulation.sys_clk);
 		device[dev_num].dev_port->DBA = ENABLED;
 
-		if (device[dev_num].dev_port->IE = ENABLED) {
+		if (device[dev_num].dev_port->IE == ENABLED) {
 			interrupt_handling_process(dev_num);
 		}
 	}

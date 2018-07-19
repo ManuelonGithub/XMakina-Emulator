@@ -44,7 +44,7 @@ void update_PSW(unsigned short src, unsigned short dst, unsigned short res, unsi
 {
 	unsigned short mss, msd, msr; /* Most significant src, dst, and res bits */
 
-	if (W_B_ctrl == 0)
+	if (W_B_ctrl == WORD)
 	{
 		mss = BIT_CHECK(src, WORD_MSBi);
 		msd = BIT_CHECK(dst, WORD_MSBi);
@@ -60,7 +60,7 @@ void update_PSW(unsigned short src, unsigned short dst, unsigned short res, unsi
 	/* Carry */
 	reg_file.PSW.C = carry[mss][msd][msr];
 	/* Zero */
-	reg_file.PSW.Z = (res == 0);
+	reg_file.PSW.Z = (W_B_ctrl == WORD) ? (res == 0) : ((unsigned char)res == 0);
 	/* Negative */
 	reg_file.PSW.N = (msr == 1);
 	/* oVerflow */

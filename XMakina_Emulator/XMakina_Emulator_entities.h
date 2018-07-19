@@ -206,6 +206,7 @@ typedef struct Emulation_properties {
 	unsigned int sys_clk;
 	unsigned int run_clk;
 	char program_name[MAX_PROG_NAME_SIZE];
+	char device_file_name[MAX_PROG_NAME_SIZE];
 	char system_status;
 	union {
 		char current_cycle_status;
@@ -213,22 +214,5 @@ typedef struct Emulation_properties {
 	};
 	unsigned char ctrl_C_detected;
 } Emulation_properties;
-
-//typedef struct device_interrupt_vector {
-//	union {
-//		unsigned short * word[2];
-//		struct {
-//			PSW_reg_format * INT_PSW;
-//			register_format * INT_PC;
-//		};
-//	};
-//} device_interrupt_vector;
-//
-//typedef struct Emulated_device {
-//	device_interrupt_vector int_vector;
-//	Device_port * dev_port;
-//	int proc_time;
-//	int time_left;
-//} Emulated_device;
 
 #endif // !XMAKINA_EMULATOR_ENTITIES_H

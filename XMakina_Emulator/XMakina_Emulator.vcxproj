@@ -179,12 +179,20 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="S_Record_test.txt" />
+    <Text Include="Test Files\instruction and device polling test\device_poll_test.txt" />
+    <Text Include="Test Files\System test with interrupts\system_test_device_file.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Reg_ini_and_direct_memory_access_test.xme" />
     <None Include="Test Files\All_XMakina_Inst.asm" />
     <None Include="Test Files\All_XMakina_Inst.lis" />
     <None Include="Test Files\All_XMakina_Inst.xme" />
+    <None Include="Test Files\instruction and device polling test\device_poll_test.asm" />
+    <None Include="Test Files\instruction and device polling test\device_poll_test.lis" />
+    <None Include="Test Files\instruction and device polling test\device_poll_test.xme" />
+    <None Include="Test Files\System test with interrupts\system_test_with_ints.asm" />
+    <None Include="Test Files\System test with interrupts\system_test_with_ints.lis" />
+    <None Include="Test Files\System test with interrupts\system_test_with_ints.xme" />
     <None Include="Test Files\XMakina_branching\XMakina_branching.asm" />
     <None Include="Test Files\XMakina_branching\XMakina_branching.lis" />
     <None Include="Test Files\XMakina_branching\XMakina_branching.xme" />
