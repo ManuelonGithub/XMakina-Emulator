@@ -55,7 +55,7 @@ char (*relative_memory_access_execution[]) (signed short, char, char, char) = { 
  */
 char LD(char action, char word_byte_control, char src_reg, char dst_reg)
 {
-	printf("Executing a LD instruction.\n");
+	//printf("Executing a LD instruction.\n");
 
 	switch (action)
 	{
@@ -107,7 +107,7 @@ char LD(char action, char word_byte_control, char src_reg, char dst_reg)
  */
 char ST(char action, char word_byte_control, char src_reg, char dst_reg)
 {
-	printf("Executing a ST instruction.\n");
+	//printf("Executing a ST instruction.\n");
 
 	switch (action)
 	{
@@ -162,7 +162,7 @@ char ST(char action, char word_byte_control, char src_reg, char dst_reg)
  */
 char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
 {
-	printf("Executing a LDR instruction.\n");
+	//printf("Executing a LDR instruction.\n");
 
 	sys_reg.MAR = (reg_file.REG[src_reg].word + offset);
 	bus(word_byte_control, READ);
@@ -184,7 +184,7 @@ char LDR(signed short offset, char word_byte_control, char src_reg, char dst_reg
  */
 char STR(signed short offset, char word_byte_control, char src_reg, char dst_reg)
 {
-	printf("Executing a STR instruction.\n");
+	//printf("Executing a STR instruction.\n");
 
 	sys_reg.MAR = (reg_file.REG[dst_reg].word + offset);
 	sys_reg.MBR = reg_file.REG[src_reg].word;

@@ -508,7 +508,7 @@ void change_mem_content()
 	unsigned int mem_loc, new_mem_value;
 
 	printf("Input the 16-bit memory location you want to change:\t0x");
-	scanf_s(" %d", &mem_loc);
+	scanf_s(" %x", &mem_loc);
 
 	if (mem_loc >= 0 && mem_loc < MEM_SIZE_BYTES) {
 		printf("Input the new 8-bit hex number to be placed in 0x%04X:\t0x", mem_loc);

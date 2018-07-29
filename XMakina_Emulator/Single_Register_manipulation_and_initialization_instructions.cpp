@@ -33,7 +33,7 @@ char (*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };
  */
 char MOVL(char dst_reg, unsigned short value)
 {
-	printf("Executing a MOVL instruction.\n");
+	//printf("Executing a MOVL instruction.\n");
 	reg_file.REG[dst_reg].LSB = value;
 
 	return PROCESS_SUCCESS;
@@ -45,7 +45,7 @@ char MOVL(char dst_reg, unsigned short value)
  */
 char MOVLZ(char dst_reg, unsigned short value)
 {
-	printf("Executing a MOVLZ instruction.\n");
+	//printf("Executing a MOVLZ instruction.\n");
 	reg_file.REG[dst_reg].word = value;			
 
 	return PROCESS_SUCCESS;
@@ -59,7 +59,7 @@ char MOVLZ(char dst_reg, unsigned short value)
  */
 char MOVH(char dst_reg, unsigned short value)
 {
-	printf("Executing a MOVH instruction.\n");
+	//printf("Executing a MOVH instruction.\n");
 	reg_file.REG[dst_reg].MSB = value;
 
 	return PROCESS_SUCCESS;
@@ -82,7 +82,7 @@ char MOVH(char dst_reg, unsigned short value)
  */
 char SRA(char word_byte_control, char dst_reg)
 {
-	printf("Executing a SRA instruction.\n");
+	//printf("Executing a SRA instruction.\n");
 
 	sys_reg.temp_reg_A = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
 
@@ -115,7 +115,7 @@ char SRA(char word_byte_control, char dst_reg)
  */
 char RRC(char word_byte_control, char dst_reg)
 {
-	printf("Executing a RRC instruction.\n");
+	//printf("Executing a RRC instruction.\n");
 
 	sys_reg.temp_reg_A = reg_file.REG[dst_reg];	// Using the system's hidden register so the update_PSW function can be used.
 
@@ -143,7 +143,7 @@ char RRC(char word_byte_control, char dst_reg)
  */
 char SWPB(char word_byte_control, char dst_reg)
 {
-	printf("Executing a SWPB instruction.\n");
+	//printf("Executing a SWPB instruction.\n");
 
 	sys_reg.temp_reg_A = reg_file.REG[dst_reg];
 
@@ -174,7 +174,7 @@ char SWPB(char word_byte_control, char dst_reg)
  */
 char SXT(char word_byte_control, char dst_reg)
 {
-	printf("Executing a SXT instruction.\n");
+	//printf("Executing a SXT instruction.\n");
 
 	sys_reg.temp_reg_A = reg_file.REG[dst_reg];															// BIT_CHECK retreives bit 7's value of destination register
 	sys_reg.temp_reg_A.MSB = (BIT_CHECK(reg_file.REG[dst_reg].LSB, BYTE_MSBi) == 1) ? LOW_BYTE_MASK : 0;	// LOW_BYTE_MASK = 0xFF, so if bit 7 = 1 (negative #), MSB = 0xFF, otherwise MSB = 0;

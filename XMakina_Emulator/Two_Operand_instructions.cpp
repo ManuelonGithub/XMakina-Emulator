@@ -62,7 +62,7 @@ unsigned short arrithmetic(unsigned short src, unsigned short dst, unsigned shor
  */
 char ADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing an ADD instruction.\n");
+	//printf("Executing an ADD instruction.\n");
 
 	if (REG_or_CON == REGISTER) {
 		reg_file.REG[dst_reg].word = 
@@ -88,7 +88,7 @@ char ADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char ADDC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing an ADDC instruction.\n");
+	//printf("Executing an ADDC instruction.\n");
 
 	if (REG_or_CON == REGISTER) {
 		reg_file.REG[dst_reg].word =
@@ -115,7 +115,7 @@ char ADDC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char SUB(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a SUB instruction.\n");
+	//printf("Executing a SUB instruction.\n");
 
 	if (REG_or_CON == REGISTER) {
 		reg_file.REG[dst_reg].word =
@@ -141,7 +141,7 @@ char SUB(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char SUBC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a SUBC instruction.\n");
+	//printf("Executing a SUBC instruction.\n");
 
 	if (REG_or_CON == REGISTER) {
 		reg_file.REG[dst_reg].word =
@@ -188,7 +188,7 @@ unsigned short bcd_add(unsigned short nibble_1, unsigned short nibble_2, unsigne
  */
 char DADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a DADD instruction.\n");
+	//printf("Executing a DADD instruction.\n");
 
 	unsigned short carry = reg_file.PSW.C;	// Cannot pass a bit field by reference, so a new variable must be created.
 
@@ -220,7 +220,7 @@ char DADD(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char CMP(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a CMP instruction.\n");
+	//printf("Executing a CMP instruction.\n");
 
 	if (REG_or_CON == REGISTER) {
 		arrithmetic(~reg_file.REG[source].word, reg_file.REG[dst_reg].word, SUBBING_TERM, word_byte_ctrl);
@@ -243,7 +243,7 @@ char CMP(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char XOR(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a XOR instruction.\n");
+	//printf("Executing a XOR instruction.\n");
 
 	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
@@ -272,7 +272,7 @@ char XOR(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char AND(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing an AND instruction.\n");
+	//printf("Executing an AND instruction.\n");
 
 	sys_reg.temp_reg_A = reg_file.REG[dst_reg];
 	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
@@ -303,7 +303,7 @@ char AND(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char BIT(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a BIT instruction.\n");
+	//printf("Executing a BIT instruction.\n");
 
 	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
@@ -329,7 +329,7 @@ char BIT(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char BIC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a BIC instruction.\n");
+	//printf("Executing a BIC instruction.\n");
 
 	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
@@ -357,7 +357,7 @@ char BIC(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char BIS(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a BIS instruction.\n");
+	//printf("Executing a BIS instruction.\n");
 
 	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
@@ -384,7 +384,7 @@ char BIS(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char MOV(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a MOV instruction.\n");
+	//printf("Executing a MOV instruction.\n");
 
 	sys_reg.temp_reg_B.word = (REG_or_CON == REGISTER) ? reg_file.REG[source].word : Const_table[source];
 
@@ -408,7 +408,7 @@ char MOV(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
  */
 char SWAP(char REG_or_CON, char word_byte_ctrl, char source, char dst_reg)
 {
-	printf("Executing a SWAP instruction.\n");
+	//printf("Executing a SWAP instruction.\n");
 
 	sys_reg.temp_reg_A.word = reg_file.REG[dst_reg].word;
 	reg_file.REG[dst_reg].word = reg_file.REG[source].word;

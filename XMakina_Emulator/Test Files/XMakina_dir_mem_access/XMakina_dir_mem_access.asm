@@ -1,7 +1,7 @@
 	ORG	#$100
 	
 MAINLINE
-	
+	ST	R0,R1
 	LD	R1,R2
 	LD.B	R2,R3
 	ST	R1,R2
