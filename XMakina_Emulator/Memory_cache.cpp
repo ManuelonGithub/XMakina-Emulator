@@ -18,11 +18,47 @@ mem_cache_options cache_options;
 
 void(*replacement_policy[]) (cache_line*, char, char) { write_through_policy, write_back_policy };
 
+void initialize_cache()
+{
+	memset(memory_cache, 0, sizeof(memory_cache));
+}
+
 void direct_mapping(char word_byte_control, char read_write_control)
 {
 	unsigned short cache_index = sys_reg.MAR % 5;
 	
 	(*replacement_policy[cache_options.replacement_policy]) (&memory_cache[cache_index], word_byte_control, read_write_control);
+
+	emulation.sys_clk += CACHE_MEM_ACCESS_CLK_INC;
+	emulation.run_clk += CACHE_MEM_ACCESS_CLK_INC;
+}
+
+void associative_mapping(char word_byte_control, char read_write_control)
+{
+	int i, cache_index, LRU_cache_value = MAX_LRU_VALUE;
+
+	for (i = 0; i < CACHE_SIZE; i++) {
+		if (memory_cache[i].address == sys_reg.MAR) {
+			cache_index = i;
+			break;
+		}
+		else if (memory_cache[i].LRU < LRU_cache_value) {
+			cache_index = i;
+			LRU_cache_value = memory_cache[i].LRU;
+		}
+	}
+
+	(*replacement_policy[cache_options.replacement_policy]) (&memory_cache[cache_index], word_byte_control, read_write_control);
+
+	if (memory_cache[cache_index].LRU != MIN_LRU_VALUE) {
+		for (i = 0; i < CACHE_SIZE; i++) {
+			if (memory_cache[i].LRU > memory_cache[cache_index].LRU) {
+				memory_cache[i].LRU--;
+			}
+		}
+	}
+
+	memory_cache[cache_index].LRU = MAX_LRU_VALUE;
 
 	emulation.sys_clk += CACHE_MEM_ACCESS_CLK_INC;
 	emulation.run_clk += CACHE_MEM_ACCESS_CLK_INC;
@@ -90,7 +126,7 @@ void write_through_policy(cache_line * cache_line, char word_byte_control, char 
 {
 	unsigned char access_status = read_write_control;
 
-	access_status |= ((cache_line->address != sys_reg.MAR) << 1);
+	access_status |= ((cache_line->address != sys_reg.MAR && cache_line->address != (sys_reg.MAR-1)) << 1);
 
 	switch (access_status)
 	{

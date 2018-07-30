@@ -24,6 +24,8 @@ extern XMakina_register_file reg_file;
 extern System_registers sys_reg;
 extern Emulation_properties emulation;
 extern union XMakina_instruction_set inst_set;
+extern cache_line memory_cache[CACHE_SIZE];
+extern mem_cache_options cache_options;
 
 enum DEBUGGER_MENU_OPTIONS {
 	BREAKPOINT_MENU = 'B', RUN_PROGRAM = 'G', CLOSE_PROGRAM = 'X', 

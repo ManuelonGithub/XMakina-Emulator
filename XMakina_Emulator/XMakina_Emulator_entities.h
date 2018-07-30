@@ -37,6 +37,7 @@
 #define DEVICE_NUMBER_SUPPORTED 8
 #define MEM_SIZE_BYTES (1 << 16)
 #define MEM_SIZE_WORDS (1 << 15)
+#define CACHE_SIZE 32
 
 #define LAST_WORD (MEM_SIZE_WORDS - 1)
 #define LAST_BYTE (MEM_SIZE_BYTES - 1)

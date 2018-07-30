@@ -15,6 +15,7 @@
 #include "Loader.h"
 #include "CPU_operations.h"
 #include "Bus_Devices_Interrupt_operations.h"
+#include "Memory_cache.h"
 
 debugger_breakpoints breakpoints;
 
