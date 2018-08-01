@@ -25,9 +25,13 @@ void initialize_cache()
 
 void direct_mapping(char word_byte_control, char read_write_control)
 {
-	unsigned short cache_index = sys_reg.MAR % 5;
-	
-	(*replacement_policy[cache_options.replacement_policy]) (&memory_cache[cache_index], word_byte_control, read_write_control);
+	unsigned short cache_index = WORD_ADDR_CONV(sys_reg.MAR) % 5;
+	char access_status;
+
+	access_status = read_write_control;
+	access_status |= ((memory_cache[cache_index].address != WORD_ADDR_CONV(sys_reg.MAR)) << 1);
+
+	(*replacement_policy[cache_options.replacement_policy]) (&memory_cache[cache_index], word_byte_control, access_status);
 
 	emulation.sys_clk += CACHE_MEM_ACCESS_CLK_INC;
 	emulation.run_clk += CACHE_MEM_ACCESS_CLK_INC;
@@ -35,11 +39,16 @@ void direct_mapping(char word_byte_control, char read_write_control)
 
 void associative_mapping(char word_byte_control, char read_write_control)
 {
-	int i, cache_index, LRU_cache_value = MAX_LRU_VALUE;
+	int i, cache_index;
+	char LRU_cache_value = MAX_LRU_VALUE;
+	char access_status;
+	
+	access_status = MISS;
 
 	for (i = 0; i < CACHE_SIZE; i++) {
-		if (memory_cache[i].address == sys_reg.MAR) {
+		if (memory_cache[i].address == WORD_ADDR_CONV(sys_reg.MAR)) {
 			cache_index = i;
+			access_status = HIT;
 			break;
 		}
 		else if (memory_cache[i].LRU < LRU_cache_value) {
@@ -48,7 +57,9 @@ void associative_mapping(char word_byte_control, char read_write_control)
 		}
 	}
 
-	(*replacement_policy[cache_options.replacement_policy]) (&memory_cache[cache_index], word_byte_control, read_write_control);
+	access_status |= read_write_control;
+
+	(*replacement_policy[cache_options.replacement_policy]) (&memory_cache[cache_index], word_byte_control, access_status);
 
 	if (memory_cache[cache_index].LRU != MIN_LRU_VALUE) {
 		for (i = 0; i < CACHE_SIZE; i++) {
@@ -122,18 +133,14 @@ void associative_mapping(char word_byte_control, char read_write_control)
 //	}
 //}
 
-void write_through_policy(cache_line * cache_line, char word_byte_control, char read_write_control)
+void write_through_policy(cache_line * cache_line, char word_byte_control, char access_status)
 {
-	unsigned char access_status = read_write_control;
-
-	access_status |= ((cache_line->address != sys_reg.MAR && cache_line->address != (sys_reg.MAR-1)) << 1);
-
 	switch (access_status)
 	{
 	case MISS_WRITE:
 		bus(word_byte_control, WRITE);
 		bus(WORD, READ);
-		cache_line->address = sys_reg.MAR;
+		cache_line->address = WORD_ADDR_CONV(sys_reg.MAR);
 		cache_line->contents.word = sys_reg.MBR;
 		break;
 
@@ -150,7 +157,7 @@ void write_through_policy(cache_line * cache_line, char word_byte_control, char 
 
 	case MISS_READ:
 		bus(WORD, READ);
-		cache_line->address = sys_reg.MAR;
+		cache_line->address = WORD_ADDR_CONV(sys_reg.MAR);
 		cache_line->contents.word = sys_reg.MBR;
 
 	case HIT_READ:
@@ -162,18 +169,15 @@ void write_through_policy(cache_line * cache_line, char word_byte_control, char 
 	}
 }
 
-void write_back_policy(cache_line * cache_line, char word_byte_control, char read_write_control)
+void write_back_policy(cache_line * cache_line, char word_byte_control, char access_status)
 {
 	unsigned short mem_location_accessed = sys_reg.MAR, overwriting_data = sys_reg.MBR;
-	unsigned char access_status = read_write_control;
-
-	access_status |= ((cache_line->address != sys_reg.MAR) << 1);
 
 	switch (access_status)
 	{
 	case MISS_WRITE:
 		if (cache_line->dirty_bit == 1) {
-			sys_reg.MAR = cache_line->address;
+			sys_reg.MAR = BYTE_ADDR_CONV(cache_line->address);
 			sys_reg.MBR = cache_line->contents.word;
 			bus(WRITE, WORD);
 			sys_reg.MAR = mem_location_accessed;
@@ -184,7 +188,7 @@ void write_back_policy(cache_line * cache_line, char word_byte_control, char rea
 			cache_line->contents.word = sys_reg.MBR;
 		}
 
-		cache_line->address = sys_reg.MAR;
+		cache_line->address = WORD_ADDR_CONV(sys_reg.MAR);
 		sys_reg.MBR = overwriting_data;
 
 	case HIT_WRITE:
@@ -199,7 +203,7 @@ void write_back_policy(cache_line * cache_line, char word_byte_control, char rea
 
 	case MISS_READ:
 		if (cache_line->dirty_bit == 1) {
-			sys_reg.MAR = cache_line->address;
+			sys_reg.MAR = BYTE_ADDR_CONV(cache_line->address);
 			sys_reg.MBR = cache_line->contents.word;
 			bus(WRITE, WORD);
 			cache_line->dirty_bit = 0;
@@ -207,7 +211,7 @@ void write_back_policy(cache_line * cache_line, char word_byte_control, char rea
 		}
 
 		bus(READ, WORD);
-		cache_line->address = sys_reg.MAR;
+		cache_line->address = WORD_ADDR_CONV(sys_reg.MAR);
 		cache_line->contents.word = sys_reg.MBR;
 
 	case HIT_READ:

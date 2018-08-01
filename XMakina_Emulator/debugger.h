@@ -10,6 +10,7 @@
  */
 
 #include "XMakina_Emulator_entities.h"
+#include "Memory_cache.h"
 
 #pragma once
 #ifndef DEBUGGER_H
