@@ -1,6 +1,6 @@
 /*
- * X-Makina Emulator Project - Bus_Devices_Interrupt_operations.cpp
- * Contains all the functions related to the bus, devices, and interrupt handling.
+ * X-Makina Emulator Project - Device_Handling.cpp
+ * Contains all the functions related to the devices and interrupt handling.
  *
  * Programmer: Manuel Burnay
  *

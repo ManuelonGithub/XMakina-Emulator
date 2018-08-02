@@ -1,6 +1,6 @@
 /*
  * X-Makina Emulator Project - debugger.cpp
- * Debugger file contains all the functions that pertaining to the debugger program
+ * Debugger file contains all the functions that pertain to the debugger program
  *
  * Programmer: Manuel Burnay
  *
@@ -678,6 +678,10 @@ void test_inst_opcode()
 	}
 }
 
+/* Memory Cache Options function:
+ * Allows the used to view memory cache and other useful information,
+ * as well as allow the user to configure the cache when there is no program loaded.
+ */
 void memory_cache_options()
 {
 	char menu_option;
@@ -692,7 +696,7 @@ void memory_cache_options()
 		}
 
 		if (strlen(emulation.program_name) == 0) {
-			printf("No program loaded. Cache able to be configured:\n");
+			printf("No program loaded, cache able to be configured.\n");
 			printf("Input your option (Input H for menu options):\t");
 			scanf_s(" %c", &menu_option, 1);
 			menu_option = toupper(menu_option);
@@ -707,7 +711,7 @@ void memory_cache_options()
 				break;
 
 			case CHANGE_CACHE_ORG:
-				cache_options.mem_org = (cache_options.mem_org == DIRECT_MAPPING) ? ASSOCIATIVE_MAPPING : DIRECT_MAPPING;
+				change_cache_org();
 				break;
 
 			case CHANCE_POLICY:
@@ -720,7 +724,7 @@ void memory_cache_options()
 
 			case MENU_HELP:
 				printf("T = Toggle memory cache ON/OFF\n");
-				printf("O = Toggle cache organization between Direct/Associative mapping\n");
+				printf("O = Change the cache organization\n");
 				printf("P = Toggle cache write/replacement policy between write-through/write-back\n");
 				printf("Q = Go back to Main Menu.\n");
 
@@ -730,7 +734,10 @@ void memory_cache_options()
 			}
 		}
 		else {
-			printf("Input 'Q' to go back to main menu.\t");
+			printf("Analytics:\t");
+			printf("Current clock count =>\t\t\t%d\n", emulation.sys_clk);
+			printf("\t\tClock count if cache was disabled =>\t%d\n", cache_options.comparison_clk);
+			printf("\nInput 'Q' to go back to main menu.\t");
 			scanf_s(" %c", &menu_option, 1);
 			menu_option = toupper(menu_option);
 
@@ -744,29 +751,44 @@ void memory_cache_options()
 	}
 }
 
+/* Cache info function:
+ * Function prints out each cache line with its contents,
+ * and the current cache configuration.
+ */
 void cache_info()
 {
 	int i, j;
 	printf("| LINE | START ADDR | DATA (HH LL) | LRU/KEY | D BIT | ");
 	printf(" | LINE | START ADDR | DATA (HH LL) | LRU/KEY | D BIT |\n");
-	printf("------------------------------------------------------ ");
-	printf(" ------------------------------------------------------\n");
-	for (i = 0; i < CACHE_SIZE; i += 2) {
-		for (j = i; j < (i + 2); j++) {
-			printf("|  %02d  |   0x%04X   |", j, BYTE_ADDR_CONV(memory_cache[i].address));
-			printf("     %02X %02X    |", memory_cache[i].contents.byte[1], memory_cache[i].contents.byte[0]);
-			printf("    %02d   |   %d   |  ", memory_cache[i].LRU, memory_cache[i].dirty_bit);
+	printf("|------|------------|--------------|---------|-------| ");
+	printf(" |------|------------|--------------|---------|-------|\n");
+	for (i = 0; i < (CACHE_SIZE / 2); i ++) {
+		for (j = i; j <= (i + (CACHE_SIZE / 2)); j+= (CACHE_SIZE / 2)) {
+			printf("|  %02d  |   0x%04X   |", j, BYTE_ADDR_CONV(memory_cache[j].address));
+			printf("     %02X %02X    |", memory_cache[j].contents.byte[1], memory_cache[j].contents.byte[0]);
+			printf("    %02d   |   %d   |  ", memory_cache[j].LRU, memory_cache[j].dirty_bit);
 		}
 		printf("\n");
 	}
 	printf("\nCache set up:\t");
 
 	printf("Organization:\t");
-	if (cache_options.mem_org == 0) {
+	switch (cache_options.mem_org)
+	{
+	case DIRECT:
 		printf("Direct Mapping\n");
-	}
-	else {
+		break;
+		
+	case ASSOCIATIVE:
 		printf("Associative Mapping\n");
+		break;
+
+	case HYBRID:
+		printf("Hybrid Mapping\n");
+		break;
+
+	default:
+		break;
 	}
 
 	printf("\t\tActive policy:\t");
@@ -778,6 +800,42 @@ void cache_info()
 	}
 
 	printf("\n");
+}
+
+/* change cache organization function:
+ * Simple function that runs the user through the process of safely selecting the desired
+ * cache organization for the program run.
+ */
+void change_cache_org()
+{
+	char menu_option;
+
+	printf("Avaliable organizations:\n");
+	printf(" Direct Mapping (input 'D'),\n Associative Mapping (input 'A'),\n Hybrid Mapping (input 'H')\n");
+	printf("Input your selection:\t");
+	scanf_s(" %c", &menu_option, 1);
+	menu_option = toupper(menu_option);
+
+	printf("\n");
+
+	switch (menu_option)
+	{
+	case DIRECT_MAPPING:
+		cache_options.mem_org = DIRECT;
+		break;
+
+	case ASSOCIATIVE_MAPPING:
+		cache_options.mem_org = ASSOCIATIVE;
+		break;
+
+	case HYBRID_MAPPING:
+		cache_options.mem_org = HYBRID;
+		break;
+
+	default:
+		printf("Invalid selection.\n\n");
+		break;
+	}
 }
 
 /* Debugger Triggers function:
@@ -862,7 +920,7 @@ void clear_emulation_properties()
 	breakpoints.step = OFF;
 
 	cache_options.op_control = DISABLED;
-	cache_options.mem_org = DIRECT_MAPPING;
+	cache_options.mem_org = DIRECT;
 	cache_options.policy = WRITE_THROUGH;
+	cache_options.comparison_clk = 0;
 }
-

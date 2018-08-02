@@ -1,6 +1,6 @@
 /*
- * X-Makina Emulator Project - Bus_Devices_Interrupt_operations.h
- * Contains all the function prototypes and definitions related to the bus, devices, and interrupt handling.
+ * X-Makina Emulator Project - Device_Handling.h
+ * Contains all the function prototypes and definitions related to the devices and interrupt handling.
  *
  * Programmer: Manuel Burnay
  *

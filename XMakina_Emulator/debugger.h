@@ -42,7 +42,12 @@ enum BREAKPOINT_MENU {
 
 enum VIEW_REG_FILE_OPTIONS { CHANGE_REG_VALUE = 'V', CLEAR_ALL_REGS = 'X' };
 enum VIEW_MEMORY_MENU { TOP_BOTTOM_LIMIT_MEM_VIEW = 'L', BASE_AND_OFFSET_MEM_VIEW = 'O', CHANGE_MEM_VALUE = 'V' };
-enum CACHE_OPTIONS { TOGGLE_CACHE = 'T', CHANGE_CACHE_ORG = 'O', CHANCE_POLICY = 'P', };
+
+enum CACHE_OPTIONS { 
+	TOGGLE_CACHE = 'T', CHANGE_CACHE_ORG = 'O', CHANCE_POLICY = 'P', 
+	DIRECT_MAPPING = 'D', ASSOCIATIVE_MAPPING = 'A', HYBRID_MAPPING = 'H' 
+};
+
 enum COMMON_MENU_OPTIONS { BACK_TO_DEBUGGER_MENU = 'Q', MENU_HELP = 'H' };
 enum DEBUGGER_FEATURES_STATE {OFF = -1, ON = 1};
 
@@ -90,6 +95,7 @@ void test_inst_opcode();
 
 void memory_cache_options();
 void cache_info();
+void change_cache_org();
 
 void debugger_triggers();
 
