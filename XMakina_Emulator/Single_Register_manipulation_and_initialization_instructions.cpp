@@ -17,7 +17,6 @@
 
 #include "stdafx.h"
 #include "Single_Register_manipulation_and_initialization_instructions.h"
-#include "Bus_Devices_Interrupt_operations.h"
 
 char (*register_initialization_execution[]) (char, unsigned short) = { MOVL, MOVLZ, MOVH };
 char (*single_register_execution[]) (char, char) = { SRA, RRC, SWPB, SXT };

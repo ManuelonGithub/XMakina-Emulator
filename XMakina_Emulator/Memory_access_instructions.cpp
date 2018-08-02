@@ -14,7 +14,7 @@
 
 #include "stdafx.h"
 #include "Memory_access_instructions.h"
-#include "Bus_Devices_Interrupt_operations.h"
+#include "Memory_access_handling.h"
 
 char (*direct_memory_access_execution[]) (char, char, char, char) = { LD, ST };
 char (*relative_memory_access_execution[]) (signed short, char, char, char) = { LDR, STR };

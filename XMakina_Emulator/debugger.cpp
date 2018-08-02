@@ -14,7 +14,7 @@
 #include "debugger.h"
 #include "Loader.h"
 #include "CPU_operations.h"
-#include "Bus_Devices_Interrupt_operations.h"
+#include "Device_Handling.h"
 
 debugger_breakpoints breakpoints;
 
@@ -103,11 +103,15 @@ void debugger_main_menu()
 			test_inst_opcode();
 			break;
 
+		case (MEMORY_CACHE_OPTIONS):
+			memory_cache_options();
+			break;
+
 		case (MENU_HELP):
 			printf("Main Menu options:\n");
 			printf("B = Breakpoint menu  | G = \"Go\" or Run program        | Q = Quit program      | R = Register File Menu\n");
 			printf("M = Memory Menu      | S = Sanity check Options       | L = Load Program file | X = Close Porgram\n");
-			printf("D = Load device File | I = Instruction Opcode testing |\n\n");
+			printf("D = Load device File | I = Instruction Opcode testing | C = Memory Cache Options\n\n");
 			break;
 
 		default:
@@ -324,7 +328,7 @@ void reg_file_options()
 			printf("R%d : 0x%04X  (%d)\n", i, reg_file.REG[i].word, reg_file.REG[i].word);
 		}
 
-		printf("\nInput 'C' to change a value of a register, 'X' to clear the register file, and 'Q' to go back to main menu.\n");
+		printf("\nInput 'V' to change a value of a register, 'X' to clear the register file, and 'Q' to go back to main menu.\n");
 		printf("Input:\t");
 		scanf_s(" %c", &option, 1);
 		option = toupper(option);
@@ -366,6 +370,7 @@ void reg_file_options()
 		printf("\n");
 	}
 }
+
 
 /* change Register contents function:
  * Function that is called within the reg_file_options function.
@@ -428,7 +433,7 @@ void memory_menu()
 		printf("\n");
 
 		switch (menu_option)
-		{
+		{	
 		case (TOP_BOTTOM_LIMIT_MEM_VIEW):
 			top_bottom_memory_view();
 			break;
@@ -449,7 +454,7 @@ void memory_menu()
 			printf("Memory Menu options:\n");
 			printf("L = View memory contents based on a lower and upper memory address limit.\n");
 			printf("O = View memory contents based on a base address and an integer offset.\n");
-			printf("C = Change the contents of a memory location.\n");
+			printf("V = Change the contents of a memory location.\n");
 			printf("Q = Go back to Main Menu.\n");
 			break;
 
@@ -673,6 +678,108 @@ void test_inst_opcode()
 	}
 }
 
+void memory_cache_options()
+{
+	char menu_option;
+
+	while (1) {
+		printf("XMakina Memory Cache: \n\n");
+		if (cache_options.op_control == ENABLED) {
+			cache_info();
+		}
+		else {
+			printf("Not Enabled.\n\n");
+		}
+
+		if (strlen(emulation.program_name) == 0) {
+			printf("No program loaded. Cache able to be configured:\n");
+			printf("Input your option (Input H for menu options):\t");
+			scanf_s(" %c", &menu_option, 1);
+			menu_option = toupper(menu_option);
+
+			printf("\n");
+
+			switch (menu_option)
+			{
+			case TOGGLE_CACHE:
+				initialize_cache();
+				cache_options.op_control = (cache_options.op_control == DISABLED) ? ENABLED : DISABLED;
+				break;
+
+			case CHANGE_CACHE_ORG:
+				cache_options.mem_org = (cache_options.mem_org == DIRECT_MAPPING) ? ASSOCIATIVE_MAPPING : DIRECT_MAPPING;
+				break;
+
+			case CHANCE_POLICY:
+				cache_options.policy = (cache_options.policy == WRITE_THROUGH) ? WRITE_BACK : WRITE_THROUGH;
+				break;
+
+			case BACK_TO_DEBUGGER_MENU:
+				return;
+				break;
+
+			case MENU_HELP:
+				printf("T = Toggle memory cache ON/OFF\n");
+				printf("O = Toggle cache organization between Direct/Associative mapping\n");
+				printf("P = Toggle cache write/replacement policy between write-through/write-back\n");
+				printf("Q = Go back to Main Menu.\n");
+
+			default:
+				printf("Not a valid option.\n");
+				break;
+			}
+		}
+		else {
+			printf("Input 'Q' to go back to main menu.\t");
+			scanf_s(" %c", &menu_option, 1);
+			menu_option = toupper(menu_option);
+
+			if (menu_option == BACK_TO_DEBUGGER_MENU) {
+				return;
+			}
+			else {
+				printf("Not a valid option.\n");
+			}
+		}
+	}
+}
+
+void cache_info()
+{
+	int i, j;
+	printf("| LINE | START ADDR | DATA (HH LL) | LRU/KEY | D BIT | ");
+	printf(" | LINE | START ADDR | DATA (HH LL) | LRU/KEY | D BIT |\n");
+	printf("------------------------------------------------------ ");
+	printf(" ------------------------------------------------------\n");
+	for (i = 0; i < CACHE_SIZE; i += 2) {
+		for (j = i; j < (i + 2); j++) {
+			printf("|  %02d  |   0x%04X   |", j, BYTE_ADDR_CONV(memory_cache[i].address));
+			printf("     %02X %02X    |", memory_cache[i].contents.byte[1], memory_cache[i].contents.byte[0]);
+			printf("    %02d   |   %d   |  ", memory_cache[i].LRU, memory_cache[i].dirty_bit);
+		}
+		printf("\n");
+	}
+	printf("\nCache set up:\t");
+
+	printf("Organization:\t");
+	if (cache_options.mem_org == 0) {
+		printf("Direct Mapping\n");
+	}
+	else {
+		printf("Associative Mapping\n");
+	}
+
+	printf("\t\tActive policy:\t");
+	if (cache_options.policy == 0) {
+		printf("Write-Through\n");
+	}
+	else {
+		printf("Write-Back\n");
+	}
+
+	printf("\n");
+}
+
 /* Debugger Triggers function:
  * This function performs all the conditional checks and upkeeping when it comes to the debugger breakpoints.
  *
@@ -753,5 +860,9 @@ void clear_emulation_properties()
 	breakpoints.memory = OFF;
 	breakpoints.priority = OFF;
 	breakpoints.step = OFF;
+
+	cache_options.op_control = DISABLED;
+	cache_options.mem_org = DIRECT_MAPPING;
+	cache_options.policy = WRITE_THROUGH;
 }
 

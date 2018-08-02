@@ -194,6 +194,29 @@ typedef struct System_registers {
 	register_format temp_reg_B;
 } System_registers;
 
+typedef struct device_interrupt_vector {
+	union {							// Using anonymous union and struct. See XMakina_Emulator_Entities.h for a note of their use.
+		unsigned short * word[2];
+		struct {
+			PSW_reg_format * INT_PSW;
+			register_format * INT_PC;
+		};
+	};
+} device_interrupt_vector;
+
+/* Emulated device structure:
+* Using this structure for emualted devices allows for the system to efficiently
+* keep track and address all the properties of a device.
+* The interrupt vector structure allows the access to the device's interrupt vector memory space,
+* and the device port pointer allows the access to the device's port in the XMakina memory
+*/
+typedef struct Emulated_device {
+	device_interrupt_vector int_vector;
+	Device_port * dev_port;
+	int proc_time;
+	int time_left;
+} Emulated_device;
+
 /* Emulation properties structure:
  * Contains properties related to the emulation run,
  * such as the system/run clocks, the current program name, the system status,

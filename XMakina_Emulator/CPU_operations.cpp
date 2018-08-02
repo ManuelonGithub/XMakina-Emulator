@@ -12,7 +12,8 @@
 
 #include "stdafx.h"
 #include "CPU_operations.h"
-#include "Bus_Devices_Interrupt_operations.h"
+#include "Memory_access_handling.h"
+#include "Device_Handling.h"
 
 XMakina_instruction_set inst_set;
 

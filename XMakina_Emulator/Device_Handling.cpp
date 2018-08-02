@@ -10,103 +10,16 @@
  */
 
 #include "stdafx.h"
-#include "Bus_Devices_Interrupt_operations.h"
+#include "Device_Handling.h"
+#include "Memory_access_handling.h"
 
 
 FILE * device_input_file = 0;		// It is initialized to 0 so the emulation can avoid attempting to read a file if it hasn't been opened.
 FILE * device_output_file = 0;
-Emulated_device device[DEVICE_NUMBER_SUPPORTED];	// NOTE: DEVICE_NUMBER_SUPPORTED is defined in XMakina_Emulator_entities.h
 input_device_data_queue input_dev_queue;
 char interrupt_queue[DEVICE_NUMBER_SUPPORTED];
 char input_file_EOF = 0;
 
-
-/* Bus function:
- * It handles the communication between the XMakina machine and its memory. 
- * The machine cannot communicate/address its memory without it.
- * The function handles read/write, byte/word controls,
- * and like in XMakina, only interacts with MAR and MBR.
- *
- * NOTE:
- * WORD_ADDR_CONV, DEVICE_MEMORY_SPACE and MEMORY_ACCESS_CLK_INC are defined in XMakina_Emulator_entities.h
- */
-void bus(char word_byte_control, char read_write_control)
-{
-	emulation.current_cycle_status = NORMAL_MEM_ACCESS;		// Initialize the emulation flag as to keep the behaviour of the function predictable.
-
-	if (sys_reg.MAR < DEVICE_MEMORY_SPACE) {
-		emulation.current_cycle_status = device_memory_access(word_byte_control, read_write_control);	// Because the user can be attempting reading/writing data to the device memory space
-	}																									// without wanting to initiate a device data transfer process, 
-																										// So the system must keep track of this in order to keep the code efficient.
-	if (emulation.current_cycle_status == NORMAL_MEM_ACCESS) {
-		if (read_write_control == READ) {
-			sys_reg.MBR = (word_byte_control == WORD) ? memory.word[WORD_ADDR_CONV(sys_reg.MAR)] : memory.byte[sys_reg.MAR];
-		}
-		else {
-			if (word_byte_control == WORD) {
-				memory.word[WORD_ADDR_CONV(sys_reg.MAR)] = sys_reg.MBR;
-			}
-			else {
-				memory.byte[sys_reg.MAR] = (unsigned char)sys_reg.MBR;
-			}
-		}
-	}
-
-	emulation.sys_clk += MEMORY_ACCESS_CLK_INC;
-	emulation.run_clk += MEMORY_ACCESS_CLK_INC;
-}
-
-/* Device memory access:
- * Function is called by the bus to handle certain events that occur when the machine addresses 
- * the memory space allocated to device ports.
- *
- * NOTE:
- * WORD_ADDR_CONV is defined in XMakina_Emulator_entities.h
- */
-char device_memory_access(char word_byte_control, char read_write_control)
-{
-	unsigned char dev_num = WORD_ADDR_CONV(sys_reg.MAR);
-
-	switch (device[dev_num].dev_port->I_O)
-	{
-	case (INPUT):
-		if (read_write_control == READ) {
-			sys_reg.MBR = (word_byte_control == WORD) ? memory.word[WORD_ADDR_CONV(sys_reg.MAR)] : memory.byte[sys_reg.MAR];
-			device[dev_num].dev_port->DBA = DISABLED;
-			return DEVICE_MEM_ACCESS;
-		}
-		else {
-			return NORMAL_MEM_ACCESS;	// In order to satisfy the instruction of the user, 
-		}								// even if it was determined that it an invalid attempt of starting a device data transfer process,
-		break;							// The system will still follow through with the memory access instruction.
-
-	case (OUTPUT):
-		if (read_write_control == WRITE) {
-			if (device[dev_num].dev_port->DBA = DISABLED) {
-				device[dev_num].dev_port->OV = ENABLED;
-			}
-
-			if (word_byte_control == WORD) {
-				memory.word[WORD_ADDR_CONV(sys_reg.MAR)] = sys_reg.MBR;
-			}
-			else {
-				memory.byte[sys_reg.MAR] = (unsigned char)sys_reg.MBR;
-			}
-
-			device[dev_num].dev_port->DBA = DISABLED;
-			device[dev_num].time_left = device[dev_num].proc_time;
-			return DEVICE_MEM_ACCESS;
-		}
-		else {
-			return NORMAL_MEM_ACCESS;
-		}
-		break;
-
-	default:
-		return NORMAL_MEM_ACCESS;
-		break;
-	}
-}
 
 /* Device initialization function:
  * Function that handles initialization of the devices and device ports.

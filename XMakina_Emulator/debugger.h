@@ -10,7 +10,7 @@
  */
 
 #include "XMakina_Emulator_entities.h"
-#include "Memory_cache.h"
+#include "Memory_access_handling.h"
 
 #pragma once
 #ifndef DEBUGGER_H
@@ -31,7 +31,8 @@ extern mem_cache_options cache_options;
 enum DEBUGGER_MENU_OPTIONS {
 	BREAKPOINT_MENU = 'B', RUN_PROGRAM = 'G', CLOSE_PROGRAM = 'X', 
 	QUIT_EMULATOR = 'Q', REG_FILE_OPTIONS = 'R', MEMORY_MENU = 'M', 
-	LOAD_PROGRAM = 'L', LOAD_DEVICE_FILE = 'D', INST_OPCODE_TEST = 'I'
+	LOAD_PROGRAM = 'L', LOAD_DEVICE_FILE = 'D', INST_OPCODE_TEST = 'I',
+	MEMORY_CACHE_OPTIONS = 'C'
 };
 enum BREAKPOINT_MENU { 
 	SET_MEM_BREAKPOINT = 'M', BRANCHING_BREAKPOINT = 'B',
@@ -39,8 +40,9 @@ enum BREAKPOINT_MENU {
 	PROGRAM_STEP = 'S'
 };
 
-enum VIEW_REG_FILE_OPTIONS { CHANGE_REG_VALUE = 'C', CLEAR_ALL_REGS = 'X' };
-enum VIEW_MEMORY_MENU { TOP_BOTTOM_LIMIT_MEM_VIEW = 'L', BASE_AND_OFFSET_MEM_VIEW = 'O', CHANGE_MEM_VALUE = 'C' };
+enum VIEW_REG_FILE_OPTIONS { CHANGE_REG_VALUE = 'V', CLEAR_ALL_REGS = 'X' };
+enum VIEW_MEMORY_MENU { TOP_BOTTOM_LIMIT_MEM_VIEW = 'L', BASE_AND_OFFSET_MEM_VIEW = 'O', CHANGE_MEM_VALUE = 'V' };
+enum CACHE_OPTIONS { TOGGLE_CACHE = 'T', CHANGE_CACHE_ORG = 'O', CHANCE_POLICY = 'P', };
 enum COMMON_MENU_OPTIONS { BACK_TO_DEBUGGER_MENU = 'Q', MENU_HELP = 'H' };
 enum DEBUGGER_FEATURES_STATE {OFF = -1, ON = 1};
 
@@ -85,6 +87,9 @@ void base_offset_memory_view();
 void close_program();
 
 void test_inst_opcode();
+
+void memory_cache_options();
+void cache_info();
 
 void debugger_triggers();
 

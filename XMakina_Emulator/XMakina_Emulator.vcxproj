@@ -148,12 +148,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Branching_instructions.h" />
-    <ClInclude Include="Bus_Devices_Interrupt_operations.h" />
+    <ClInclude Include="Device_Handling.h" />
     <ClInclude Include="CPU_operations.h" />
     <ClInclude Include="debugger.h" />
     <ClInclude Include="Loader.h" />
     <ClInclude Include="Memory_access_instructions.h" />
-    <ClInclude Include="Memory_cache.h" />
+    <ClInclude Include="Memory_access_handling.h" />
     <ClInclude Include="Single_Register_manipulation_and_initialization_instructions.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -162,12 +162,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Branching_instructions.cpp" />
-    <ClCompile Include="Bus_Devices_Interrupt_operations.cpp" />
+    <ClCompile Include="Device_Handling.cpp" />
     <ClCompile Include="CPU_operations.cpp" />
     <ClCompile Include="debugger.cpp" />
     <ClCompile Include="Loader.cpp" />
     <ClCompile Include="Memory_access_instructions.cpp" />
-    <ClCompile Include="Memory_cache.cpp" />
+    <ClCompile Include="Memory_access_handling.cpp" />
     <ClCompile Include="Single_Register_manipulation_and_initialization_instructions.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

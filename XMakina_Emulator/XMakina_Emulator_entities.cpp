@@ -19,6 +19,7 @@ XMakina_memory memory;
 XMakina_register_file reg_file;
 System_registers sys_reg;
 Emulation_properties emulation;
+Emulated_device device[DEVICE_NUMBER_SUPPORTED];	// NOTE: DEVICE_NUMBER_SUPPORTED is defined in XMakina_Emulator_entities.h
 
 // Table determines the value of the carry bit based on the MSBi of src, dst, and res.
 unsigned carry[2][2][2] = {		// SRC, DST, RES
